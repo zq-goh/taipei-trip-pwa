@@ -349,8 +349,35 @@ function sampleTrip(){
 function blankTrip(){
   return {version:1, name:"Taipei trip", updatedAt:Date.now(), days:[{id:uid(), title:"Day 1", date:"", stops:[]}]};
 }
-function validTrip(t){
-  return t && typeof t==="object" && Array.isArray(t.days) && t.days.every(d => d && typeof d.id==="string" && Array.isArray(d.stops));
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+const DATE_RE = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+// Checks a trip from storage or a backup. Returns {trip} (a cleaned copy) or {error} (a message for the user).
+// Fills in fields older backups may lack and keeps unknown fields, so old backups still restore.
+function checkTrip(t){
+  if (!t || typeof t!=="object" || Array.isArray(t) || !Array.isArray(t.days)) return {error:"This text isn’t a trip backup. Paste the full text you copied earlier, including the first { and last }."};
+  if (typeof t.version==="number" && t.version > 1) return {error:"This backup was made by a newer version of the app. Reload the app while online, then try again."};
+  const seen = new Set();
+  const freshId = (id) => { if (typeof id!=="string" || !id || seen.has(id)) id = uid(); seen.add(id); return id; };
+  const str = (v) => typeof v==="string" ? v : "";
+  const days = [];
+  for (let i = 0; i < t.days.length; i++){
+    const d = t.days[i], where = "Day "+(i+1);
+    if (!d || typeof d!=="object" || !Array.isArray(d.stops)) return {error: where+" is damaged: it has no list of stops."};
+    const date = str(d.date);
+    if (date && !DATE_RE.test(date)) return {error: where+" has a date that isn’t YYYY-MM-DD: “"+date+"”."};
+    const stops = [];
+    for (let j = 0; j < d.stops.length; j++){
+      const s = d.stops[j], at = where+", stop "+(j+1);
+      if (!s || typeof s!=="object") return {error: at+" is damaged."};
+      const name = str(s.name).trim();
+      if (!name) return {error: at+" has no place name."};
+      const time = str(s.time);
+      if (time && !TIME_RE.test(time)) return {error: at+" ("+name+") has a time that isn’t HH:MM: “"+time+"”."};
+      stops.push(Object.assign({}, s, {id:freshId(s.id), time, name, zh:str(s.zh), address:str(s.address), category:str(s.category), notes:str(s.notes), done:s.done===true}));
+    }
+    days.push(Object.assign({}, d, {id:freshId(d.id), title:str(d.title), date, stops}));
+  }
+  return {trip: Object.assign({}, t, {version:1, name:str(t.name).trim() || "Taipei trip", updatedAt:Number(t.updatedAt) || 0, days})};
 }
 
 /* ---------- State ---------- */
@@ -359,8 +386,12 @@ let ui = loadUi();
 let currentDayId = pickInitialDay();
 
 function loadLocal(){
-  try { const raw = localStorage.getItem(LS_KEY); if (!raw) return null; const t = JSON.parse(raw); return validTrip(t) ? t : null; }
-  catch(e){ return null; }
+  let raw = null;
+  try { raw = localStorage.getItem(LS_KEY); if (!raw) return null; const r = checkTrip(JSON.parse(raw)); if (r.trip) return r.trip; }
+  catch(e){}
+  // Saved data exists but can't be used: keep a copy before the sample trip overwrites it.
+  if (raw){ try { localStorage.setItem(LS_KEY+":unreadable", raw); } catch(e){} }
+  return null;
 }
 function saveLocal(){ try { localStorage.setItem(LS_KEY, JSON.stringify(trip)); } catch(e){} }
 function loadUi(){ try { return JSON.parse(localStorage.getItem(UI_KEY)) || {}; } catch(e){ return {}; } }
@@ -596,8 +627,9 @@ $("copyBackup").addEventListener("click", async () => {
 armConfirm($("restoreBackup"), "Replace trip with this text", () => {
   let t;
   try { t = JSON.parse($("backupText").value); } catch(e){ t = null; }
-  if (!validTrip(t)){ $("backupError").style.color = ""; $("backupError").textContent = "This text isn’t a trip backup. Paste the full text you copied earlier, including the first { and last }."; $("backupError").hidden = false; return; }
-  trip = t; trip.version = 1;
+  const r = checkTrip(t);
+  if (r.error){ $("backupError").style.color = ""; $("backupError").textContent = r.error; $("backupError").hidden = false; return; }
+  trip = r.trip;
   currentDayId = trip.days[0] && trip.days[0].id;
   $("backupDialog").close();
   commit();

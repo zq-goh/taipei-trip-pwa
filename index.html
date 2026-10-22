@@ -12,11 +12,16 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<script>
+// Apply a saved light/dark choice before first paint, so the page doesn't flash the other theme.
+try { const t = (JSON.parse(localStorage.getItem("taipei-trip:ui")) || {}).theme; if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch(e){}
+</script>
 <style>
 :root{
-  --bg:#F2F4F5; --surface:#FFFFFF; --ink:#17202A; --muted:#5B6976; --rule:#D7DDE2; --soft:#E8ECEF;
+  --bg:#FBF5EC; --surface:#FFFFFF; --ink:#2B2118; --muted:#76665A; --rule:#EADFCF; --soft:#F5EDE1;
   --line:#E3002C; --on-line:#FFFFFF;
-  --sans:system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --sky1:#FFE6CC; --sky2:#FBF5EC; --far:#E9D6BE; --tower:#D7C0A2; --hill:#E4D2BA;
+  --sans:ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --zh:"PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
   color-scheme: light;
   box-sizing:border-box;
@@ -25,12 +30,14 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#0E1318; --surface:#172029; --ink:#E7ECF0; --muted:#95A3AF; --rule:#2A3640; --soft:#1F2a34;
+    --bg:#15110D; --surface:#211B15; --ink:#F3EADF; --muted:#B4A493; --rule:#3A3027; --soft:#2C241C;
+    --sky1:#1C2140; --sky2:#191512; --far:#2E2A3C; --tower:#423B52; --hill:#241E19;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0E1318; --surface:#172029; --ink:#E7ECF0; --muted:#95A3AF; --rule:#2A3640; --soft:#1F2a34;
+  --bg:#15110D; --surface:#211B15; --ink:#F3EADF; --muted:#B4A493; --rule:#3A3027; --soft:#2C241C;
+  --sky1:#1C2140; --sky2:#191512; --far:#2E2A3C; --tower:#423B52; --hill:#241E19;
   color-scheme: dark;
 }
 *,*::before,*::after{box-sizing:inherit}
@@ -45,9 +52,10 @@ button{cursor:pointer}
 /* Header */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--rule)}
 .top-inner{max-width:640px;margin:0 auto;padding:12px 16px 0}
-.title-row{display:flex;align-items:center;gap:12px}
-.trip-name{flex:1;min-width:0;margin:0;font-size:1.25rem;font-weight:800;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sync{font-size:.8rem;color:var(--muted);white-space:nowrap}
+.title-row{display:flex;align-items:center;gap:10px}
+.title-block{flex:1;min-width:0}
+.trip-name{margin:0;font-size:1.25rem;line-height:1.2;font-weight:800;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sync{display:block;font-size:.78rem;color:var(--muted);white-space:nowrap}
 .icon-btn{border:1px solid var(--rule);background:transparent;border-radius:999px;width:40px;height:40px;display:grid;place-items:center;font-size:1.2rem;line-height:1}
 
 /* Day tabs */
@@ -61,8 +69,24 @@ button{cursor:pointer}
 
 /* Day body */
 main{max-width:640px;margin:0 auto;padding:20px 16px 120px}
+/* Illustrations */
+.hero{position:relative;overflow:hidden;height:132px;margin:0 0 20px;padding:14px 16px;border-radius:20px;background:linear-gradient(var(--sky1),var(--sky2))}
+.hero-art{position:absolute;inset:0;width:100%;height:100%;overflow:visible} /* hills extend left past the viewBox on wide screens */
+.greet{position:relative;z-index:1;margin:0;max-width:58%;font-weight:800;font-size:1rem;line-height:1.3}
+.k-far{fill:var(--far)} .k-tower{fill:var(--tower)} .k-hill{fill:var(--hill)}
+.zh-art{font-family:var(--zh);font-weight:700}
+.drift{animation:drift 4.5s ease-in-out infinite alternate}
+.drift.d2{animation-duration:5.5s;animation-delay:-2s}
+.drift.d3{animation-duration:6.5s;animation-delay:-4s}
+@keyframes drift{from{transform:translate(0,2px)}to{transform:translate(1.5px,-4px)}}
+.bob{animation:bob .9s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(1px)}}
+.bear-art{display:block;width:120px;height:120px;margin:0 auto 12px}
+.lanterns-art{display:block;width:100%;max-width:320px;height:auto;margin:0 auto -6px}
+.taxi-art{display:block;width:150px;height:auto;margin:0 auto 10px}
 .day-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:22px}
-.day-sign{flex:none;width:64px;height:64px;border-radius:14px;background:var(--line);color:var(--on-line);display:grid;place-items:center;font-weight:800;font-size:1.5rem;letter-spacing:-0.02em}
+.kicker{margin:0 0 2px;color:var(--muted);font-size:.85rem;font-weight:700;letter-spacing:.02em}
+.day-sign{flex:none;width:64px;height:64px;border-radius:18px;transform:rotate(-3deg);background:var(--line);color:var(--on-line);display:grid;place-items:center;font-weight:800;font-size:1.5rem;letter-spacing:-0.02em}
 .day-meta{flex:1;min-width:0}
 .day-title{margin:0;font-size:1.6rem;line-height:1.15;font-weight:800;letter-spacing:-0.02em}
 .day-sub{margin:4px 0 0;color:var(--muted);font-size:.92rem}
@@ -75,8 +99,11 @@ main{max-width:640px;margin:0 auto;padding:20px 16px 120px}
 .stop{position:relative;display:grid;grid-template-columns:56px 1fr;gap:12px;padding-bottom:18px}
 .badge{position:relative;z-index:1;width:56px;height:44px;border-radius:10px;border:3px solid var(--line);background:var(--surface);color:var(--ink);font-weight:800;font-size:.85rem;display:grid;place-items:center;padding:0;transition:background-color .15s, color .15s}
 .stop.done .badge{background:var(--line);color:var(--on-line)}
-.badge .tick{font-size:1.1rem}
-.card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:12px 14px}
+/* Done stops get a station-style souvenir stamp (紀念章). */
+.stamp{display:grid;place-items:center;width:36px;height:36px;border:2px dashed currentColor;border-radius:50%;font-size:.72rem;font-weight:800;transform:rotate(-12deg)}
+.stamp.fresh{animation:thunk .28s cubic-bezier(.3,1.6,.6,1)}
+@keyframes thunk{from{transform:scale(1.8) rotate(-30deg);opacity:0}to{transform:scale(1) rotate(-12deg);opacity:1}}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:18px;padding:12px 14px;box-shadow:0 1px 0 var(--rule)}
 .stop.next .card{border-color:var(--line);box-shadow:0 0 0 1px var(--line)}
 .stop.done .card{opacity:.62}
 .card-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
@@ -92,10 +119,15 @@ main{max-width:640px;margin:0 auto;padding:20px 16px 120px}
 .chip{border:1px solid var(--rule);background:var(--soft);border-radius:999px;padding:6px 12px;font-size:.85rem;font-weight:600;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:6px}
 .chip.primary{background:var(--line);border-color:var(--line);color:var(--on-line)}
 
-.empty{border:2px dashed var(--rule);border-radius:14px;padding:28px 20px;text-align:center;color:var(--muted)}
+.empty{border:2px dashed var(--rule);border-radius:18px;padding:28px 20px;text-align:center;color:var(--muted)}
 .empty p{margin:0 0 12px}
+.empty .big-zh{font-size:1.3rem;font-weight:800;color:var(--ink)}
+.skyline{display:block;width:100%;max-width:320px;height:auto;margin:0 auto;color:var(--rule)}
+.terminal{margin-top:4px;padding:18px 0 0;text-align:center;color:var(--muted);font-weight:700}
+.terminal p{margin:8px 0 0}
+.terminal.all-done p{color:var(--ink)}
 
-.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:6;border:0;border-radius:999px;padding:14px 26px;background:var(--line);color:var(--on-line);font-weight:800;font-size:1rem;box-shadow:0 6px 20px rgba(0,0,0,.22)}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:6;border:0;border-radius:999px;padding:14px 26px;background:var(--line);color:var(--on-line);font-weight:800;font-size:1rem;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.22)}
 
 /* Dialogs */
 dialog{border:0;padding:0;border-radius:18px;background:var(--surface);color:var(--ink);width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 32px)}
@@ -132,15 +164,18 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
 .banner{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:7;max-width:616px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;font-weight:600}
 .banner[hidden]{display:none}
 .banner button{margin-left:auto;border:0;border-radius:8px;padding:8px 14px;background:var(--line);color:var(--on-line);font-weight:800}
-@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="top-inner">
     <div class="title-row">
-      <h1 class="trip-name" id="tripName">Taipei trip</h1>
-      <span class="sync" id="sync" aria-live="polite">Saved on this phone</span>
+      <div class="title-block">
+        <h1 class="trip-name" id="tripName">Taipei trip</h1>
+        <span class="sync" id="sync" aria-live="polite">Saved on this phone</span>
+      </div>
+      <button class="icon-btn" id="themeBtn" type="button"></button>
       <button class="icon-btn" id="menuBtn" aria-label="Trip settings">⋯</button>
     </div>
     <nav class="days" id="days" role="tablist" aria-label="Days"></nav>
@@ -148,7 +183,126 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
 </header>
 
 <main id="main"></main>
-<button class="fab" id="addStop">Add stop</button>
+<button class="fab" id="addStop"><span lang="zh-Hant">加一站</span> · Add stop</button>
+<!-- Illustrations, cloned into the page by art(name). Decorative only (aria-hidden). -->
+<!-- Taipei skyline: Elephant Mountain, city blocks, Taipei 101. -->
+<template id="art-skyline">
+  <svg class="skyline" viewBox="0 0 320 92" aria-hidden="true" fill="currentColor">
+    <path d="M0 92C26 60 62 56 98 74C112 81 124 86 134 92Z"/>
+    <path d="M214 92C246 66 288 60 320 72V92Z"/>
+    <rect x="104" y="68" width="12" height="24" rx="1"/><rect x="119" y="60" width="11" height="32" rx="1"/>
+    <rect x="186" y="64" width="12" height="28" rx="1"/><rect x="201" y="72" width="14" height="20" rx="1"/>
+    <rect x="145" y="78" width="30" height="14" rx="1"/>
+    <path d="M152 78H168L170 71H150Z M152 71H168L170 64H150Z M152 64H168L170 57H150Z M152 57H168L170 50H150Z M152 50H168L170 43H150Z M152 43H168L170 36H150Z M152 36H168L170 29H150Z M152 29H168L170 22H150Z"/>
+    <path d="M154 22H166L164 14H156Z"/><rect x="159.2" y="0" width="1.6" height="14"/>
+  </svg>
+</template>
+<!-- Day banner: temple roof with swallowtail ridges (燕尾脊) and red lanterns, Taipei 101, drifting sky lanterns (天燈). -->
+<template id="art-hero">
+  <svg class="hero-art" viewBox="0 0 360 128" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+    <path class="k-far" d="M-600 128V88C-480 72 -360 94 -240 84C-150 76 -60 96 0 92C40 74 70 70 110 84C140 94 160 78 200 72C240 66 270 80 300 76C325 72 345 66 360 70V128Z"/>
+    <g class="k-tower">
+      <rect x="262" y="104" width="14" height="24"/><rect x="318" y="98" width="12" height="30"/><rect x="334" y="108" width="16" height="20"/>
+      <rect x="288" y="112" width="24" height="16"/>
+      <path d="M293 112H307L309 104H291Z M293 104H307L309 96H291Z M293 96H307L309 88H291Z M293 88H307L309 80H291Z M293 80H307L309 72H291Z M293 72H307L309 64H291Z M293 64H307L309 56H291Z M293 56H307L309 48H291Z"/>
+      <path d="M295 48H305L303 40H297Z"/><rect x="299.3" y="22" width="1.4" height="18"/>
+    </g>
+    <path class="k-hill" d="M-600 128V114C-400 106 -200 122 0 116C60 108 120 112 180 118C240 124 300 112 360 116V128Z"/>
+    <rect x="46" y="104" width="88" height="24" fill="#F1D3A8"/>
+    <rect x="50" y="104" width="6" height="24" fill="#C8372D"/><rect x="124" y="104" width="6" height="24" fill="#C8372D"/>
+    <rect x="78" y="110" width="24" height="18" fill="#8E2F22"/><rect x="89.4" y="110" width="1.2" height="18" fill="#F2B33D"/>
+    <path d="M22 106Q46 102 56 86H124Q134 102 158 106Z" fill="#D2553A"/>
+    <rect x="54" y="82" width="72" height="5" rx="2" fill="#9A2E22"/>
+    <g fill="none" stroke="#9A2E22" stroke-width="3.5" stroke-linecap="round">
+      <path d="M57 85Q45 85 37 70"/><path d="M57 85Q48 82 44 67"/><path d="M123 85Q135 85 143 70"/><path d="M123 85Q132 82 136 67"/>
+    </g>
+    <circle cx="90" cy="78" r="3.5" fill="#F2B33D"/>
+    <g stroke="#9A2E22" stroke-width="1"><path d="M34 105V110"/><path d="M146 105V110"/></g>
+    <g fill="#E0362C"><ellipse cx="34" cy="116" rx="6" ry="7"/><ellipse cx="146" cy="116" rx="6" ry="7"/></g>
+    <g fill="#F2B33D"><rect x="31" y="108" width="6" height="2.5"/><rect x="31" y="122" width="6" height="2.5"/><rect x="143" y="108" width="6" height="2.5"/><rect x="143" y="122" width="6" height="2.5"/></g>
+    <g transform="translate(236 46)"><g class="drift"><use href="#sky-lantern"/></g></g>
+    <g transform="translate(268 20) scale(.7)"><g class="drift d2"><use href="#sky-lantern"/></g></g>
+    <g transform="translate(346 30) scale(.6)"><g class="drift d3"><use href="#sky-lantern"/></g></g>
+  </svg>
+</template>
+<!-- Celebration: sky lanterns carrying wishes (平安 = peace and safety) and plum blossoms (梅花). -->
+<template id="art-lanterns">
+  <svg class="lanterns-art" viewBox="0 0 320 76" aria-hidden="true">
+    <g transform="translate(96 42) scale(1.5)"><g class="drift"><use href="#sky-lantern"/>
+      <text class="zh-art" x="0" y="-1.5" font-size="6.5" text-anchor="middle" fill="#B33A2A">平</text>
+      <text class="zh-art" x="0" y="5.5" font-size="6.5" text-anchor="middle" fill="#B33A2A">安</text></g></g>
+    <g transform="translate(156 28)"><g class="drift d2"><use href="#sky-lantern"/></g></g>
+    <g transform="translate(210 48) scale(1.2)"><g class="drift d3"><use href="#sky-lantern"/></g></g>
+    <g transform="translate(258 20) scale(.8)"><g class="drift"><use href="#sky-lantern"/></g></g>
+    <g transform="translate(46 22)"><use href="#plum"/></g><g transform="translate(286 56) scale(.8)"><use href="#plum"/></g>
+    <g transform="translate(184 64) scale(.7)"><use href="#plum"/></g>
+  </svg>
+</template>
+<!-- Formosan black bear (台灣黑熊), with its V-shaped chest mark, holding bubble tea (珍珠奶茶). -->
+<template id="art-bear">
+  <svg class="bear-art" viewBox="0 0 120 120" aria-hidden="true">
+    <clipPath id="bear-clip"><circle cx="60" cy="60" r="56"/></clipPath>
+    <circle cx="60" cy="60" r="56" fill="#FCE9CF"/>
+    <g clip-path="url(#bear-clip)">
+      <path d="M26 122Q24 80 60 80Q96 80 94 122Z" fill="#241E1B"/>
+      <path d="M44 88Q60 104 76 88Q60 96 44 88Z" fill="#FFF6E8"/>
+      <circle cx="40" cy="36" r="9" fill="#241E1B"/><circle cx="80" cy="36" r="9" fill="#241E1B"/>
+      <circle cx="40" cy="36" r="4" fill="#5C4A40"/><circle cx="80" cy="36" r="4" fill="#5C4A40"/>
+      <circle cx="60" cy="56" r="24" fill="#241E1B"/>
+      <ellipse cx="60" cy="65" rx="11" ry="8" fill="#D9B48A"/>
+      <ellipse cx="60" cy="61" rx="4" ry="3" fill="#241E1B"/>
+      <path d="M56 67Q60 70 64 67" fill="none" stroke="#241E1B" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="51" cy="51" r="3" fill="#FFF"/><circle cx="69" cy="51" r="3" fill="#FFF"/>
+      <circle cx="51.6" cy="51.6" r="1.6" fill="#241E1B"/><circle cx="69.6" cy="51.6" r="1.6" fill="#241E1B"/>
+      <circle cx="45" cy="61" r="3.5" fill="#F29BAA" opacity=".75"/><circle cx="75" cy="61" r="3.5" fill="#F29BAA" opacity=".75"/>
+      <path d="M86 70L92 54" stroke="#D7262E" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M74 74H96L93 104H77Z" fill="#E8C9A0" stroke="#FFF6E8" stroke-width="1.5"/>
+      <rect x="72" y="70" width="26" height="5" rx="2.5" fill="#FFF6E8"/>
+      <g fill="#4A2F22"><circle cx="80" cy="99" r="2.4"/><circle cx="85.5" cy="100" r="2.4"/><circle cx="90.5" cy="98.5" r="2.4"/><circle cx="83" cy="94.5" r="2.4"/><circle cx="88.5" cy="94" r="2.4"/></g>
+      <ellipse cx="74" cy="92" rx="7" ry="6" fill="#241E1B"/>
+    </g>
+  </svg>
+</template>
+<!-- Taipei's yellow taxi, for the Show driver screen. -->
+<template id="art-taxi">
+  <svg class="taxi-art" viewBox="0 0 140 64" aria-hidden="true">
+    <ellipse cx="70" cy="59" rx="58" ry="4" fill="#000" opacity=".12"/>
+    <g class="bob">
+      <rect x="58" y="6" width="26" height="9" rx="2" fill="#FFF" stroke="#C79A00"/>
+      <text x="71" y="13" font-size="6" font-weight="800" text-anchor="middle" fill="#2A2A2A" font-family="system-ui, sans-serif">TAXI</text>
+      <path d="M10 44Q10 34 20 33L38 31L52 18Q56 14 62 14H90Q96 14 100 18L112 31L124 33Q132 35 132 44V50H10Z" fill="#F6C400" stroke="#C79A00" stroke-width="1.5"/>
+      <path d="M45 31L55 20Q57 18 61 18H72V31Z" fill="#9ED3EA"/><path d="M76 18H89Q93 18 96 21L106 31H76Z" fill="#9ED3EA"/>
+      <path d="M74 31V48" stroke="#C79A00" stroke-width="1.2"/>
+      <circle cx="127" cy="40" r="2.5" fill="#FFF7D6"/><rect x="10" y="38" width="3" height="5" fill="#D7262E"/>
+    </g>
+    <g fill="#2A2A2A"><circle cx="36" cy="50" r="9"/><circle cx="106" cy="50" r="9"/></g>
+    <g fill="#C9C9C9"><circle cx="36" cy="50" r="4"/><circle cx="106" cy="50" r="4"/></g>
+  </svg>
+</template>
+<!-- Theme toggle icons: shows the theme you'll switch to. -->
+<template id="art-sun">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+  </svg>
+</template>
+<template id="art-moon">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+    <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/>
+  </svg>
+</template>
+<!-- Shared symbols for the illustrations above. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="sky-lantern">
+      <path d="M-9 -12H9L7 11Q0 13 -7 11Z" fill="#FFE3A3" stroke="#E8A85A" stroke-width="1"/>
+      <ellipse cx="0" cy="8" rx="5" ry="2.6" fill="#FF9F3A" opacity=".85"/>
+    </g>
+    <g id="plum">
+      <g fill="#F7B6C8"><circle cx="0" cy="-3.4" r="3.2"/><circle cx="3.2" cy="-1" r="3.2"/><circle cx="2" cy="2.8" r="3.2"/><circle cx="-2" cy="2.8" r="3.2"/><circle cx="-3.2" cy="-1" r="3.2"/></g>
+      <circle r="1.6" fill="#E8A33D"/>
+    </g>
+  </defs>
+</svg>
 <div class="banner" id="updateBanner" role="status" hidden><span>A new version is ready.</span><button type="button" id="reloadApp">Reload</button></div>
 
 <!-- Stop editor -->
@@ -270,6 +424,8 @@ const LINES = [
   {code:"Y",  c:"#F2CC00", on:"#1B1B1B"}
 ];
 const CATS = ["Sight","Food","Shopping","Transit","Stay","Other"];
+const CAT_ICON = {Sight:"🏮", Food:"🥟", Shopping:"🛍️", Transit:"🚇", Stay:"🏨", Other:"✨"};
+const ZH_DIGITS = "一二三四五六七八九";
 
 /* ---------- Helpers ---------- */
 const $ = (id) => document.getElementById(id);
@@ -301,6 +457,27 @@ function fmtDate(s, long){
   return dt.toLocaleDateString("en-GB", long ? {weekday:"long", day:"numeric", month:"long"} : {weekday:"short", day:"numeric", month:"short"});
 }
 function lineFor(i){ return LINES[i % LINES.length]; }
+function catLabel(c){ return CAT_ICON[c] ? CAT_ICON[c]+" "+c : c; }
+// 1-99 as Chinese numerals, for 第一天 style day labels.
+function zhNum(n){
+  if (n < 10) return ZH_DIGITS[n-1];
+  const tens = Math.floor(n/10), ones = n % 10;
+  return (tens > 1 ? ZH_DIGITS[tens-1] : "") + "十" + (ones ? ZH_DIGITS[ones-1] : "");
+}
+function daysUntil(s){
+  const [y,m,d] = s.split("-").map(Number), n = new Date();
+  return Math.round((Date.UTC(y, m-1, d) - Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())) / 864e5);
+}
+function greeting(){
+  const dates = trip.days.map(d => d.date).filter(Boolean).sort();
+  if (!dates.length) return "你好! Add dates to your days to start the countdown ✈️";
+  const toGo = daysUntil(dates[0]);
+  if (toGo > 1) return "還有 "+toGo+" 天 · "+toGo+" days to Taipei ✈️";
+  if (toGo === 1) return "明天出發! Taipei tomorrow ✈️";
+  if (daysUntil(dates[dates.length-1]) >= 0) return "旅途愉快! Enjoy Taipei 🧋";
+  return "下次見, 台北! See you again, Taipei 👋";
+}
+function art(name){ return $("art-"+name).content.firstElementChild.cloneNode(true); }
 function mapsUrl(s){
   const q = s.address || s.zh || (s.name + " Taipei");
   return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
@@ -384,6 +561,7 @@ function checkTrip(t){
 let trip = loadLocal() || sampleTrip();
 let ui = loadUi();
 let currentDayId = pickInitialDay();
+let justStamped = null; // stop id whose stamp should animate on the next render
 
 function loadLocal(){
   let raw = null;
@@ -449,10 +627,11 @@ function render(){
   const doneCount = day.stops.filter(s => s.done).length;
   const subParts = [];
   if (day.date) subParts.push(fmtDate(day.date, true));
-  if (day.stops.length) subParts.push(doneCount + " of " + day.stops.length + " stops done");
+  if (day.stops.length) subParts.push(doneCount + " of " + day.stops.length + " stamps collected");
   const head = h("section",{class:"day-head"},
     h("div",{class:"day-sign", "aria-hidden":"true", text: line.code + (idx+1)}),
     h("div",{class:"day-meta"},
+      h("p",{class:"kicker"}, h("span",{lang:"zh-Hant", text:"第"+zhNum(idx+1)+"天"}), " · Day "+(idx+1)),
       h("h2",{class:"day-title"}, day.title || ("Day "+(idx+1)), day.date===t ? h("span",{class:"today-flag", text:"Today"}) : null),
       h("p",{class:"day-sub", text: subParts.join(", ") || "No date set"}),
       h("button",{class:"text-btn", onclick:openDayDialog}, "Edit day")
@@ -463,27 +642,39 @@ function render(){
   let body;
   if (!day.stops.length){
     body = h("div",{class:"empty"},
-      h("p",{text:"No stops planned for this day yet."}),
+      art("bear"),
+      h("p",{class:"big-zh", lang:"zh-Hant", text:"慢慢來"}),
+      h("p",{text:"Take it easy: nothing planned for this day yet."}),
       h("button",{class:"btn primary", onclick:() => openStopDialog(null)}, "Add the first stop")
     );
   } else {
     const nextId = (day.date===t || !day.date) ? (day.stops.find(s => !s.done)||{}).id : null;
-    body = h("ol",{class:"line"}, day.stops.map((s,i) => stopItem(s, i, line, s.id===nextId)));
+    const allDone = doneCount === day.stops.length;
+    body = [
+      h("ol",{class:"line"}, day.stops.map((s,i) => stopItem(s, i, line, s.id===nextId))),
+      h("div",{class:"terminal" + (allDone ? " all-done" : "")},
+        allDone ? art("lanterns") : null,
+        art("skyline"),
+        allDone ? h("p",{}, h("span",{lang:"zh-Hant", text:"辛苦了!"}), " All stamps collected 🎉")
+                : h("p",{}, h("span",{lang:"zh-Hant", text:"終點站"}), " · End of the line"))
+    ];
   }
-  $("main").replaceChildren(head, body);
+  const hero = h("div",{class:"hero"}, art("hero"), h("p",{class:"greet", text:greeting()}));
+  $("main").replaceChildren(hero, head, ...[].concat(body));
+  justStamped = null;
 }
 
 function stopItem(s, i, line, isNext){
   const code = line.code + String(i+1).padStart(2,"0");
   return h("li",{class:"stop" + (s.done?" done":"") + (isNext?" next":"")},
     h("button",{class:"badge", "aria-pressed":String(!!s.done), "aria-label":(s.done?"Mark not done: ":"Mark done: ")+s.name,
-      onclick:() => { s.done = !s.done; commit(); }},
-      s.done ? h("span",{class:"tick", text:"✓"}) : code),
+      onclick:() => { s.done = !s.done; justStamped = s.done ? s.id : null; commit(); }},
+      s.done ? h("span",{class:"stamp" + (s.id===justStamped ? " fresh" : ""), lang:"zh-Hant", text:"已到"}) : code),
     h("div",{class:"card"},
       h("div",{class:"card-top"},
         s.time ? h("span",{class:"time", text:s.time}) : null,
-        s.category ? h("span",{class:"cat", text:s.category}) : null,
-        isNext ? h("span",{class:"next-label", text:"Next stop"}) : null
+        s.category ? h("span",{class:"cat", text:catLabel(s.category)}) : null,
+        isNext ? h("span",{class:"next-label"}, h("span",{lang:"zh-Hant", text:"下一站"}), " Next stop") : null
       ),
       h("h3",{class:"name", text:s.name}),
       s.zh ? h("p",{class:"zh", lang:"zh-Hant", text:s.zh}) : null,
@@ -505,7 +696,7 @@ document.querySelectorAll("dialog").forEach(dlg => {
 function openDlg(id){ const d = $(id); if (!d.open) d.showModal(); }
 
 /* ---------- Stop editor ---------- */
-$("fCat").replaceChildren(...CATS.map(c => h("option",{value:c, text:c})));
+$("fCat").replaceChildren(...CATS.map(c => h("option",{value:c, text:catLabel(c)})));
 let editingStopId = null;
 function openStopDialog(stopId){
   editingStopId = stopId;
@@ -636,6 +827,7 @@ armConfirm($("restoreBackup"), "Replace trip with this text", () => {
 });
 
 /* ---------- Show driver ---------- */
+document.querySelector("#showDialog .show").prepend(art("taxi"));
 function openShow(s){
   $("showZh").textContent = s.zh || s.name;
   $("showAddr").textContent = s.address || "";
@@ -644,6 +836,21 @@ function openShow(s){
   $("showMap").href = mapsUrl(s);
   openDlg("showDialog");
 }
+
+/* ---------- Theme ---------- */
+// Follows the phone's setting until the toggle is used; then ui.theme ("light"/"dark") wins.
+const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+function isDark(){ const t = document.documentElement.dataset.theme; return t ? t === "dark" : darkQuery.matches; }
+function applyTheme(){
+  const root = document.documentElement;
+  if (ui.theme === "light" || ui.theme === "dark") root.dataset.theme = ui.theme; else delete root.dataset.theme;
+  const dark = isDark();
+  $("themeBtn").replaceChildren(art(dark ? "sun" : "moon"));
+  $("themeBtn").setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+}
+$("themeBtn").addEventListener("click", () => { ui.theme = isDark() ? "light" : "dark"; saveUi(); applyTheme(); });
+darkQuery.addEventListener("change", applyTheme);
+applyTheme();
 
 /* ---------- Status, offline support, install ---------- */
 const syncEl = $("sync");

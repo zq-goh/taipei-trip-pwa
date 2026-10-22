@@ -11,10 +11,19 @@ Personal itinerary app for a Taipei trip (November 2026). Used on a phone during
 
 ## Design decisions (keep unless asked)
 - Days take Taipei Metro line colours/letters (R, BL, G, O, BR, Y); stops show station-style codes (R01, R02...).
+- Light-hearted Taiwan theme: warm palette, rounded system font, done stops get a 已到 souvenir stamp (紀念章),
+  short Traditional Chinese touches (第一天, 下一站, 終點站, trip countdown) next to English, inline SVG Taipei 101 skyline.
+  Chinese is always paired with English so the app stays readable.
+- Illustrations are hand-drawn inline SVG in `<template id="art-*">`, cloned with `art(name)`: day banner (temple roof
+  with swallowtail ridges, red lanterns, Taipei 101, sky lanterns), black bear with bubble tea (empty day),
+  rising sky lanterns with 平安 and plum blossoms (all done), yellow taxi (Show driver). Decorative only (aria-hidden).
 - "Show driver" shows the Chinese name and address full screen with 請帶我到這裡.
 - "Navigate" opens a Google Maps search URL (needs connection; that's accepted).
 - System fonts only, so nothing loads from the network.
 - Destructive actions use two-tap confirm buttons, not `confirm()`.
+- Header sun/moon button toggles light/dark. It follows the phone's setting until first used, then `ui.theme`
+  ("light"/"dark", in `taipei-trip:ui`, not in trip backups) sets `data-theme` on `<html>`. A tiny `<head>` script
+  applies it before first paint.
 
 ## Rules
 - Every change to any cached file: bump `CACHE_VERSION` in `sw.js` and update `APP_FILES` if files are added or removed.

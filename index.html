@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taipei trip</title>
+<meta name="theme-color" content="#E3002C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Taipei Trip">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<style>
+:root{
+  --bg:#F2F4F5; --surface:#FFFFFF; --ink:#17202A; --muted:#5B6976; --rule:#D7DDE2; --soft:#E8ECEF;
+  --line:#E3002C; --on-line:#FFFFFF;
+  --sans:system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --zh:"PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1318; --surface:#172029; --ink:#E7ECF0; --muted:#95A3AF; --rule:#2A3640; --soft:#1F2a34;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1318; --surface:#172029; --ink:#E7ECF0; --muted:#95A3AF; --rule:#2A3640; --soft:#1F2a34;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 120px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--line);outline-offset:2px}
+[lang|="zh"]{font-family:var(--zh)}
+
+/* Header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--rule)}
+.top-inner{max-width:640px;margin:0 auto;padding:12px 16px 0}
+.title-row{display:flex;align-items:center;gap:12px}
+.trip-name{flex:1;min-width:0;margin:0;font-size:1.25rem;font-weight:800;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sync{font-size:.8rem;color:var(--muted);white-space:nowrap}
+.icon-btn{border:1px solid var(--rule);background:transparent;border-radius:999px;width:40px;height:40px;display:grid;place-items:center;font-size:1.2rem;line-height:1}
+
+/* Day tabs */
+.days{display:flex;gap:8px;overflow-x:auto;padding:12px 0 12px;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.day-tab{flex:none;display:flex;align-items:center;gap:8px;border:1.5px solid var(--rule);background:var(--surface);border-radius:999px;padding:6px 14px 6px 6px;font-weight:600;font-size:.9rem}
+.day-tab .code{display:grid;place-items:center;min-width:30px;height:24px;padding:0 6px;border-radius:6px;background:var(--c);color:var(--on);font-size:.75rem;font-weight:800}
+.day-tab .sub{font-weight:500;color:var(--muted);font-size:.8rem}
+.day-tab[aria-selected="true"]{border-color:var(--c);box-shadow:inset 0 0 0 1.5px var(--c)}
+.day-tab.add{padding:6px 14px;color:var(--muted);border-style:dashed}
+
+/* Day body */
+main{max-width:640px;margin:0 auto;padding:20px 16px 120px}
+.day-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:22px}
+.day-sign{flex:none;width:64px;height:64px;border-radius:14px;background:var(--line);color:var(--on-line);display:grid;place-items:center;font-weight:800;font-size:1.5rem;letter-spacing:-0.02em}
+.day-meta{flex:1;min-width:0}
+.day-title{margin:0;font-size:1.6rem;line-height:1.15;font-weight:800;letter-spacing:-0.02em}
+.day-sub{margin:4px 0 0;color:var(--muted);font-size:.92rem}
+.today-flag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--line);color:var(--on-line);font-size:.75rem;font-weight:700;vertical-align:2px}
+.text-btn{border:0;background:none;padding:6px 0;color:var(--muted);font-weight:600;font-size:.9rem;text-decoration:underline;text-underline-offset:3px}
+
+/* The line */
+.line{list-style:none;margin:0;padding:0;position:relative}
+.line::before{content:"";position:absolute;left:25px;top:22px;bottom:22px;width:6px;border-radius:3px;background:var(--line)}
+.stop{position:relative;display:grid;grid-template-columns:56px 1fr;gap:12px;padding-bottom:18px}
+.badge{position:relative;z-index:1;width:56px;height:44px;border-radius:10px;border:3px solid var(--line);background:var(--surface);color:var(--ink);font-weight:800;font-size:.85rem;display:grid;place-items:center;padding:0;transition:background-color .15s, color .15s}
+.stop.done .badge{background:var(--line);color:var(--on-line)}
+.badge .tick{font-size:1.1rem}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:12px 14px}
+.stop.next .card{border-color:var(--line);box-shadow:0 0 0 1px var(--line)}
+.stop.done .card{opacity:.62}
+.card-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.time{font-weight:800;font-variant-numeric:tabular-nums}
+.cat{font-size:.8rem;color:var(--muted);font-weight:600}
+.next-label{font-size:.8rem;font-weight:700;color:var(--line)}
+:root[data-dim-line] .next-label{color:var(--ink)}
+.name{margin:2px 0 0;font-size:1.12rem;font-weight:700;line-height:1.25}
+.stop.done .name{text-decoration:line-through;text-decoration-thickness:1.5px}
+.zh{margin:2px 0 0;font-size:1rem;color:var(--muted)}
+.notes{margin:8px 0 0;font-size:.92rem;color:var(--muted);white-space:pre-wrap}
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.chip{border:1px solid var(--rule);background:var(--soft);border-radius:999px;padding:6px 12px;font-size:.85rem;font-weight:600;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+.chip.primary{background:var(--line);border-color:var(--line);color:var(--on-line)}
+
+.empty{border:2px dashed var(--rule);border-radius:14px;padding:28px 20px;text-align:center;color:var(--muted)}
+.empty p{margin:0 0 12px}
+
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:6;border:0;border-radius:999px;padding:14px 26px;background:var(--line);color:var(--on-line);font-weight:800;font-size:1rem;box-shadow:0 6px 20px rgba(0,0,0,.22)}
+
+/* Dialogs */
+dialog{border:0;padding:0;border-radius:18px;background:var(--surface);color:var(--ink);width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 32px)}
+dialog::backdrop{background:rgba(8,12,16,.55)}
+.sheet{padding:20px}
+.sheet h2{margin:0 0 16px;font-size:1.25rem;font-weight:800}
+.field{display:block;margin-bottom:14px}
+.field span{display:block;font-size:.85rem;font-weight:600;color:var(--muted);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;border:1.5px solid var(--rule);background:var(--bg);border-radius:10px;padding:10px 12px}
+.field textarea{min-height:84px;resize:vertical}
+.row{display:flex;gap:12px}
+.row>.field{flex:1;min-width:0}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.btn{border:1.5px solid var(--rule);background:transparent;border-radius:10px;padding:10px 16px;font-weight:700}
+.btn.primary{background:var(--line);border-color:var(--line);color:var(--on-line)}
+.btn.danger{color:#C62828;border-color:currentColor}
+.btn.arming{background:#C62828;color:#fff;border-color:#C62828}
+.spacer{flex:1}
+.menu-list{display:grid;gap:8px}
+.menu-list .btn{text-align:left}
+.hint{font-size:.85rem;color:var(--muted);margin:6px 0 12px}
+.error{color:#C62828;font-size:.9rem;margin:6px 0 0}
+.mono-box{width:100%;min-height:160px;border:1.5px solid var(--rule);background:var(--bg);border-radius:10px;padding:10px;font-family:ui-monospace, Menlo, Consolas, monospace;font-size:.78rem}
+
+/* Show-to-driver */
+#showDialog{width:min(640px,calc(100vw - 16px))}
+.show{padding:28px 22px;text-align:center}
+.show .ask{margin:0 0 18px;font-size:1.05rem;color:var(--muted)}
+.show .big{margin:0;font-size:clamp(2.2rem,11vw,4rem);line-height:1.15;font-weight:700;word-break:break-word}
+.show .addr{margin:16px 0 0;font-size:1.3rem;font-weight:500}
+.show .en{margin:14px 0 22px;color:var(--muted)}
+.show .btns{justify-content:center}
+
+.banner{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:7;max-width:616px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;font-weight:600}
+.banner[hidden]{display:none}
+.banner button{margin-left:auto;border:0;border-radius:8px;padding:8px 14px;background:var(--line);color:var(--on-line);font-weight:800}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="title-row">
+      <h1 class="trip-name" id="tripName">Taipei trip</h1>
+      <span class="sync" id="sync" aria-live="polite">Saved on this phone</span>
+      <button class="icon-btn" id="menuBtn" aria-label="Trip settings">⋯</button>
+    </div>
+    <nav class="days" id="days" role="tablist" aria-label="Days"></nav>
+  </div>
+</header>
+
+<main id="main"></main>
+<button class="fab" id="addStop">Add stop</button>
+<div class="banner" id="updateBanner" role="status" hidden><span>A new version is ready.</span><button type="button" id="reloadApp">Reload</button></div>
+
+<!-- Stop editor -->
+<dialog id="stopDialog" aria-labelledby="stopDialogTitle">
+  <div class="sheet">
+    <h2 id="stopDialogTitle">Add stop</h2>
+    <label class="field"><span>Place</span><input id="fName" required placeholder="Longshan Temple"></label>
+    <label class="field"><span>Chinese name (shown to drivers)</span><input id="fZh" lang="zh-Hant" placeholder="艋舺龍山寺"></label>
+    <label class="field"><span>Address (optional)</span><input id="fAddr" placeholder="Paste from Google Maps"></label>
+    <div class="row">
+      <label class="field"><span>Time</span><input id="fTime" type="time"></label>
+      <label class="field"><span>Type</span><select id="fCat"></select></label>
+    </div>
+    <label class="field"><span>Notes</span><textarea id="fNotes" placeholder="Tickets, what to order, how to get there"></textarea></label>
+    <p class="error" id="stopError" hidden></p>
+    <div class="btns" id="stopEditOnly">
+      <button class="btn" type="button" id="moveUp">Move earlier</button>
+      <button class="btn" type="button" id="moveDown">Move later</button>
+      <span class="spacer"></span>
+      <button class="btn danger" type="button" id="deleteStop">Delete stop</button>
+    </div>
+    <div class="btns" style="margin-top:14px">
+      <span class="spacer"></span>
+      <button class="btn" type="button" data-close>Cancel</button>
+      <button class="btn primary" type="button" id="saveStop">Save stop</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Day editor -->
+<dialog id="dayDialog" aria-labelledby="dayDialogTitle">
+  <div class="sheet">
+    <h2 id="dayDialogTitle">Edit day</h2>
+    <label class="field"><span>Day title</span><input id="dTitle" placeholder="Old Taipei"></label>
+    <label class="field"><span>Date</span><input id="dDate" type="date"></label>
+    <div class="btns">
+      <button class="btn" type="button" id="sortDay">Sort stops by time</button>
+      <span class="spacer"></span>
+      <button class="btn danger" type="button" id="deleteDay">Delete this day</button>
+    </div>
+    <div class="btns" style="margin-top:14px">
+      <span class="spacer"></span>
+      <button class="btn" type="button" data-close>Cancel</button>
+      <button class="btn primary" type="button" id="saveDay">Save day</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Trip menu -->
+<dialog id="menuDialog" aria-labelledby="menuTitle">
+  <div class="sheet">
+    <h2 id="menuTitle">Trip settings</h2>
+    <label class="field"><span>Trip name</span><input id="tName"></label>
+    <div class="menu-list">
+      <button class="btn primary" type="button" id="installApp" hidden>Install on this device</button>
+      <p class="hint" id="iosHint" hidden>To install: tap the Share button in Safari, then “Add to Home Screen”.</p>
+      <button class="btn" type="button" id="addDay">Add a day</button>
+      <button class="btn" type="button" id="openBackup">Back up or restore</button>
+      <button class="btn danger" type="button" id="loadSample">Replace with sample trip</button>
+      <button class="btn danger" type="button" id="startBlank">Start a blank trip</button>
+    </div>
+    <div class="btns" style="margin-top:16px">
+      <span class="spacer"></span>
+      <button class="btn primary" type="button" id="saveMenu">Done</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Backup -->
+<dialog id="backupDialog" aria-labelledby="backupTitle">
+  <div class="sheet">
+    <h2 id="backupTitle">Back up or restore</h2>
+    <p class="hint">Save a backup file before the trip and after big changes. Your trip lives only on this device, so a backup is your safety net if the browser clears its data.</p>
+    <div class="btns" style="margin:0 0 14px">
+      <button class="btn primary" type="button" id="saveFile">Save backup file</button>
+      <button class="btn" type="button" id="loadFile">Load backup file</button>
+      <input type="file" id="fileInput" accept="application/json,.json" hidden>
+    </div>
+    <p class="hint">Or copy and paste the backup as text. This also works for moving a trip over from the Claude version.</p>
+    <textarea class="mono-box" id="backupText" spellcheck="false"></textarea>
+    <p class="error" id="backupError" hidden></p>
+    <div class="btns" style="margin-top:12px">
+      <button class="btn" type="button" id="copyBackup">Copy</button>
+      <button class="btn danger" type="button" id="restoreBackup">Replace trip with this text</button>
+      <span class="spacer"></span>
+      <button class="btn primary" type="button" data-close>Close</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Show to driver -->
+<dialog id="showDialog" aria-label="Show this to your driver">
+  <div class="show">
+    <p class="ask" lang="zh-Hant">請帶我到這裡 <span lang="en">(Please take me here)</span></p>
+    <p class="big" id="showZh" lang="zh-Hant"></p>
+    <p class="addr" id="showAddr"></p>
+    <p class="en" id="showEn"></p>
+    <div class="btns">
+      <a class="btn primary" id="showMap" target="_blank" rel="noopener" style="text-decoration:none">Open in Google Maps</a>
+      <button class="btn" type="button" data-close>Close</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Constants ---------- */
+const LS_KEY = "taipei-trip:v1";
+const UI_KEY = "taipei-trip:ui";
+// Day colours borrow Taipei Metro line colours; codes mimic MRT station numbering.
+const LINES = [
+  {code:"R",  c:"#E3002C", on:"#FFFFFF"},
+  {code:"BL", c:"#0070BD", on:"#FFFFFF"},
+  {code:"G",  c:"#008659", on:"#FFFFFF"},
+  {code:"O",  c:"#F5A818", on:"#1B1B1B"},
+  {code:"BR", c:"#9C6A1F", on:"#FFFFFF"},
+  {code:"Y",  c:"#F2CC00", on:"#1B1B1B"}
+];
+const CATS = ["Sight","Food","Shopping","Transit","Stay","Other"];
+
+/* ---------- Helpers ---------- */
+const $ = (id) => document.getElementById(id);
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2));
+const clone = (o) => JSON.parse(JSON.stringify(o));
+function h(tag, props, ...kids){
+  const el = document.createElement(tag);
+  for (const [k,v] of Object.entries(props||{})){
+    if (v==null || v===false) continue;
+    if (k==="class") el.className = v;
+    else if (k==="text") el.textContent = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v===true ? "" : v);
+  }
+  for (const kid of kids.flat()){
+    if (kid==null || kid===false) continue;
+    el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  }
+  return el;
+}
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function fmtDate(s, long){
+  if (!s) return "";
+  const [y,m,d] = s.split("-").map(Number);
+  const dt = new Date(y, m-1, d);
+  return dt.toLocaleDateString("en-GB", long ? {weekday:"long", day:"numeric", month:"long"} : {weekday:"short", day:"numeric", month:"short"});
+}
+function lineFor(i){ return LINES[i % LINES.length]; }
+function mapsUrl(s){
+  const q = s.address || s.zh || (s.name + " Taipei");
+  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+}
+function armConfirm(btn, label, action){
+  // Two-tap confirm for destructive actions (no browser confirm() inside the viewer).
+  btn.addEventListener("click", () => {
+    if (btn.dataset.armed){ delete btn.dataset.armed; btn.classList.remove("arming"); btn.textContent = label; action(); return; }
+    btn.dataset.armed = "1"; btn.classList.add("arming"); btn.textContent = "Tap again to confirm";
+    setTimeout(() => { if (btn.dataset.armed){ delete btn.dataset.armed; btn.classList.remove("arming"); btn.textContent = label; } }, 3500);
+  });
+}
+
+/* ---------- Sample trip ---------- */
+function stop(time, name, zh, category, notes){ return {id:uid(), time, name, zh, address:"", category, notes:notes||"", done:false}; }
+function sampleTrip(){
+  return {
+    version:1, name:"Taipei trip", updatedAt:0,
+    days:[
+      {id:uid(), title:"Arrival and Xinyi", date:"", stops:[
+        stop("15:00","Check in at hotel","", "Stay","Replace with your hotel. Put its Chinese name above so you can show it to taxi drivers."),
+        stop("17:00","Taipei 101","台北101","Sight","Observatory tickets: check prices and whether to book ahead."),
+        stop("19:30","Raohe Night Market","饒河街觀光夜市","Food","Pepper buns near the entrance.")
+      ]},
+      {id:uid(), title:"Old Taipei", date:"", stops:[
+        stop("09:00","Longshan Temple","艋舺龍山寺","Sight",""),
+        stop("11:00","Bopiliao Historic Block","剝皮寮歷史街區","Sight",""),
+        stop("13:30","Dihua Street","迪化街","Shopping","Dried goods and tea shops."),
+        stop("16:00","Chiang Kai-shek Memorial Hall","中正紀念堂","Sight",""),
+        stop("19:00","Ximending","西門町","Food","")
+      ]},
+      {id:uid(), title:"Day trip north", date:"", stops:[
+        stop("09:30","Jiufen Old Street","九份老街","Sight","Check bus or train options the night before. Often misty: bring a jacket."),
+        stop("14:30","Shifen Old Street","十分老街","Sight","Sky lanterns."),
+        stop("19:30","Ningxia Night Market","寧夏夜市","Food","Oyster omelette.")
+      ]},
+      {id:uid(), title:"Museums and a sunset", date:"", stops:[
+        stop("09:30","National Palace Museum","國立故宮博物院","Sight",""),
+        stop("14:00","Beitou hot springs","北投溫泉","Sight",""),
+        stop("17:00","Elephant Mountain","象山","Sight","Short steep climb. Aim to arrive before sunset."),
+        stop("19:30","Din Tai Fung","鼎泰豐","Food","Expect a queue; take a number first.")
+      ]}
+    ]
+  };
+}
+function blankTrip(){
+  return {version:1, name:"Taipei trip", updatedAt:Date.now(), days:[{id:uid(), title:"Day 1", date:"", stops:[]}]};
+}
+function validTrip(t){
+  return t && typeof t==="object" && Array.isArray(t.days) && t.days.every(d => d && typeof d.id==="string" && Array.isArray(d.stops));
+}
+
+/* ---------- State ---------- */
+let trip = loadLocal() || sampleTrip();
+let ui = loadUi();
+let currentDayId = pickInitialDay();
+
+function loadLocal(){
+  try { const raw = localStorage.getItem(LS_KEY); if (!raw) return null; const t = JSON.parse(raw); return validTrip(t) ? t : null; }
+  catch(e){ return null; }
+}
+function saveLocal(){ try { localStorage.setItem(LS_KEY, JSON.stringify(trip)); } catch(e){} }
+function loadUi(){ try { return JSON.parse(localStorage.getItem(UI_KEY)) || {}; } catch(e){ return {}; } }
+function saveUi(){ try { localStorage.setItem(UI_KEY, JSON.stringify(ui)); } catch(e){} }
+function pickInitialDay(){
+  const t = todayStr();
+  const today = trip.days.find(d => d.date === t);
+  if (today) return today.id;
+  if (ui.day && trip.days.some(d => d.id === ui.day)) return ui.day;
+  return trip.days[0] && trip.days[0].id;
+}
+function currentDay(){ return trip.days.find(d => d.id === currentDayId) || trip.days[0]; }
+
+function commit(){
+  trip.updatedAt = Date.now();
+  saveLocal();
+  render();
+  scheduleRemote();
+}
+
+/* ---------- Render ---------- */
+function render(){
+  $("tripName").textContent = trip.name || "Taipei trip";
+  document.title = trip.name || "Taipei trip";
+  if (!trip.days.length){ trip.days.push({id:uid(), title:"Day 1", date:"", stops:[]}); }
+  if (!currentDay()) currentDayId = trip.days[0].id;
+  const day = currentDay();
+  currentDayId = day.id;
+  const idx = trip.days.indexOf(day);
+  const line = lineFor(idx);
+  const root = document.documentElement;
+  root.style.setProperty("--line", line.c);
+  root.style.setProperty("--on-line", line.on);
+  if (line.on !== "#FFFFFF") root.setAttribute("data-dim-line",""); else root.removeAttribute("data-dim-line");
+
+  // Day tabs
+  const t = todayStr();
+  const nav = $("days");
+  nav.replaceChildren(
+    ...trip.days.map((d,i) => {
+      const L = lineFor(i);
+      return h("button", {class:"day-tab", role:"tab", "aria-selected": String(d.id===day.id), style:"--c:"+L.c+";--on:"+L.on,
+        onclick:() => { currentDayId = d.id; ui.day = d.id; saveUi(); render(); window.scrollTo({top:0}); }},
+        h("span",{class:"code", text:L.code}),
+        h("span",{}, "Day "+(i+1)),
+        d.date ? h("span",{class:"sub", text: d.date===t ? "Today" : fmtDate(d.date)}) : null
+      );
+    }),
+    h("button",{class:"day-tab add", onclick:addDay, "aria-label":"Add a day"}, "+ Day")
+  );
+  const sel = nav.querySelector('[aria-selected="true"]');
+  if (sel && sel.scrollIntoView) sel.scrollIntoView({block:"nearest", inline:"nearest"});
+
+  // Day header
+  const doneCount = day.stops.filter(s => s.done).length;
+  const subParts = [];
+  if (day.date) subParts.push(fmtDate(day.date, true));
+  if (day.stops.length) subParts.push(doneCount + " of " + day.stops.length + " stops done");
+  const head = h("section",{class:"day-head"},
+    h("div",{class:"day-sign", "aria-hidden":"true", text: line.code + (idx+1)}),
+    h("div",{class:"day-meta"},
+      h("h2",{class:"day-title"}, day.title || ("Day "+(idx+1)), day.date===t ? h("span",{class:"today-flag", text:"Today"}) : null),
+      h("p",{class:"day-sub", text: subParts.join(", ") || "No date set"}),
+      h("button",{class:"text-btn", onclick:openDayDialog}, "Edit day")
+    )
+  );
+
+  // Stops
+  let body;
+  if (!day.stops.length){
+    body = h("div",{class:"empty"},
+      h("p",{text:"No stops planned for this day yet."}),
+      h("button",{class:"btn primary", onclick:() => openStopDialog(null)}, "Add the first stop")
+    );
+  } else {
+    const nextId = (day.date===t || !day.date) ? (day.stops.find(s => !s.done)||{}).id : null;
+    body = h("ol",{class:"line"}, day.stops.map((s,i) => stopItem(s, i, line, s.id===nextId)));
+  }
+  $("main").replaceChildren(head, body);
+}
+
+function stopItem(s, i, line, isNext){
+  const code = line.code + String(i+1).padStart(2,"0");
+  return h("li",{class:"stop" + (s.done?" done":"") + (isNext?" next":"")},
+    h("button",{class:"badge", "aria-pressed":String(!!s.done), "aria-label":(s.done?"Mark not done: ":"Mark done: ")+s.name,
+      onclick:() => { s.done = !s.done; commit(); }},
+      s.done ? h("span",{class:"tick", text:"✓"}) : code),
+    h("div",{class:"card"},
+      h("div",{class:"card-top"},
+        s.time ? h("span",{class:"time", text:s.time}) : null,
+        s.category ? h("span",{class:"cat", text:s.category}) : null,
+        isNext ? h("span",{class:"next-label", text:"Next stop"}) : null
+      ),
+      h("h3",{class:"name", text:s.name}),
+      s.zh ? h("p",{class:"zh", lang:"zh-Hant", text:s.zh}) : null,
+      s.notes ? h("p",{class:"notes", text:s.notes}) : null,
+      h("div",{class:"actions"},
+        h("a",{class:"chip primary", href:mapsUrl(s), target:"_blank", rel:"noopener"}, "Navigate"),
+        (s.zh || s.address) ? h("button",{class:"chip", onclick:() => openShow(s)}, "Show driver") : null,
+        h("button",{class:"chip", onclick:() => openStopDialog(s.id)}, "Edit")
+      )
+    )
+  );
+}
+
+/* ---------- Dialog plumbing ---------- */
+document.querySelectorAll("dialog").forEach(dlg => {
+  dlg.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => dlg.close()));
+  dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+});
+function openDlg(id){ const d = $(id); if (!d.open) d.showModal(); }
+
+/* ---------- Stop editor ---------- */
+$("fCat").replaceChildren(...CATS.map(c => h("option",{value:c, text:c})));
+let editingStopId = null;
+function openStopDialog(stopId){
+  editingStopId = stopId;
+  const day = currentDay();
+  const s = stopId ? day.stops.find(x => x.id===stopId) : null;
+  $("stopDialogTitle").textContent = s ? "Edit stop" : "Add stop";
+  $("fName").value = s ? s.name : "";
+  $("fZh").value = s ? (s.zh||"") : "";
+  $("fAddr").value = s ? (s.address||"") : "";
+  $("fTime").value = s ? (s.time||"") : "";
+  $("fCat").value = s ? (s.category||"Sight") : "Sight";
+  $("fNotes").value = s ? (s.notes||"") : "";
+  $("stopEditOnly").hidden = !s;
+  $("stopError").hidden = true;
+  openDlg("stopDialog");
+  setTimeout(() => { if (!s) $("fName").focus(); }, 50);
+}
+$("saveStop").addEventListener("click", () => {
+  const name = $("fName").value.trim();
+  if (!name){ $("stopError").textContent = "Add a place name to save this stop."; $("stopError").hidden = false; $("fName").focus(); return; }
+  const day = currentDay();
+  const fields = {name, zh:$("fZh").value.trim(), address:$("fAddr").value.trim(), time:$("fTime").value, category:$("fCat").value, notes:$("fNotes").value.trim()};
+  if (editingStopId){
+    Object.assign(day.stops.find(x => x.id===editingStopId), fields);
+  } else {
+    const s = Object.assign({id:uid(), done:false}, fields);
+    // Insert in time order when a time is given; otherwise append.
+    let at = day.stops.length;
+    if (s.time){ const i = day.stops.findIndex(x => x.time && x.time > s.time); if (i !== -1) at = i; }
+    day.stops.splice(at, 0, s);
+  }
+  $("stopDialog").close();
+  commit();
+});
+function moveStop(dir){
+  const day = currentDay();
+  const i = day.stops.findIndex(x => x.id===editingStopId);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= day.stops.length) return;
+  [day.stops[i], day.stops[j]] = [day.stops[j], day.stops[i]];
+  commit();
+}
+$("moveUp").addEventListener("click", () => moveStop(-1));
+$("moveDown").addEventListener("click", () => moveStop(1));
+armConfirm($("deleteStop"), "Delete stop", () => {
+  const day = currentDay();
+  day.stops = day.stops.filter(x => x.id !== editingStopId);
+  $("stopDialog").close();
+  commit();
+});
+$("addStop").addEventListener("click", () => openStopDialog(null));
+
+/* ---------- Day editor ---------- */
+function openDayDialog(){
+  const d = currentDay();
+  $("dTitle").value = d.title || "";
+  $("dDate").value = d.date || "";
+  openDlg("dayDialog");
+}
+$("saveDay").addEventListener("click", () => {
+  const d = currentDay();
+  d.title = $("dTitle").value.trim();
+  d.date = $("dDate").value;
+  $("dayDialog").close();
+  commit();
+});
+$("sortDay").addEventListener("click", () => {
+  const d = currentDay();
+  d.stops.sort((a,b) => (a.time||"99:99").localeCompare(b.time||"99:99"));
+  $("dayDialog").close();
+  commit();
+});
+armConfirm($("deleteDay"), "Delete this day", () => {
+  const i = trip.days.findIndex(d => d.id===currentDayId);
+  trip.days.splice(i,1);
+  if (!trip.days.length) trip.days.push({id:uid(), title:"Day 1", date:"", stops:[]});
+  currentDayId = trip.days[Math.max(0,i-1)].id;
+  $("dayDialog").close();
+  commit();
+});
+function addDay(){
+  const last = trip.days[trip.days.length-1];
+  let date = "";
+  if (last && last.date){
+    const [y,m,dd] = last.date.split("-").map(Number);
+    const n = new Date(y, m-1, dd+1);
+    date = n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0");
+  }
+  const d = {id:uid(), title:"Day "+(trip.days.length+1), date, stops:[]};
+  trip.days.push(d);
+  currentDayId = d.id; ui.day = d.id; saveUi();
+  commit();
+}
+
+/* ---------- Trip menu ---------- */
+$("menuBtn").addEventListener("click", () => { $("tName").value = trip.name || ""; openDlg("menuDialog"); });
+$("saveMenu").addEventListener("click", () => {
+  const n = $("tName").value.trim() || "Taipei trip";
+  $("menuDialog").close();
+  if (n !== trip.name){ trip.name = n; commit(); }
+});
+$("addDay").addEventListener("click", () => { $("menuDialog").close(); addDay(); });
+armConfirm($("loadSample"), "Replace with sample trip", () => { trip = sampleTrip(); currentDayId = trip.days[0].id; $("menuDialog").close(); commit(); });
+armConfirm($("startBlank"), "Start a blank trip", () => { const n = trip.name; trip = blankTrip(); trip.name = n; currentDayId = trip.days[0].id; $("menuDialog").close(); commit(); });
+
+/* ---------- Backup ---------- */
+$("openBackup").addEventListener("click", () => {
+  $("menuDialog").close();
+  $("backupText").value = JSON.stringify(trip, null, 1);
+  $("backupError").hidden = true;
+  openDlg("backupDialog");
+});
+$("copyBackup").addEventListener("click", async () => {
+  const ta = $("backupText");
+  try { await navigator.clipboard.writeText(ta.value); $("copyBackup").textContent = "Copied"; }
+  catch(e){ ta.focus(); ta.select(); $("copyBackup").textContent = "Text selected: copy it"; }
+  setTimeout(() => $("copyBackup").textContent = "Copy", 2500);
+});
+armConfirm($("restoreBackup"), "Replace trip with this text", () => {
+  let t;
+  try { t = JSON.parse($("backupText").value); } catch(e){ t = null; }
+  if (!validTrip(t)){ $("backupError").style.color = ""; $("backupError").textContent = "This text isn’t a trip backup. Paste the full text you copied earlier, including the first { and last }."; $("backupError").hidden = false; return; }
+  trip = t; trip.version = 1;
+  currentDayId = trip.days[0] && trip.days[0].id;
+  $("backupDialog").close();
+  commit();
+});
+
+/* ---------- Show driver ---------- */
+function openShow(s){
+  $("showZh").textContent = s.zh || s.name;
+  $("showAddr").textContent = s.address || "";
+  $("showAddr").hidden = !s.address;
+  $("showEn").textContent = s.zh ? s.name : "";
+  $("showMap").href = mapsUrl(s);
+  openDlg("showDialog");
+}
+
+/* ---------- Status, offline support, install ---------- */
+const syncEl = $("sync");
+function scheduleRemote(){ updateStatus(); }
+function updateStatus(){ syncEl.textContent = navigator.onLine ? "Saved on this phone" : "Offline, saved on this phone"; }
+window.addEventListener("online", updateStatus);
+window.addEventListener("offline", updateStatus);
+
+// Ask the browser not to evict our data under storage pressure (best effort).
+if (navigator.storage && navigator.storage.persist){ navigator.storage.persist().catch(() => {}); }
+
+// Service worker: caches the app so it opens with no connection.
+if ("serviceWorker" in navigator){
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register("./sw.js").catch(() => {});
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (hadController) $("updateBanner").hidden = false;
+  });
+}
+$("reloadApp").addEventListener("click", () => location.reload());
+
+// Install button (Android/desktop Chrome); instructions on iOS Safari.
+let installEvt = null;
+const standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; $("installApp").hidden = false; });
+window.addEventListener("appinstalled", () => { $("installApp").hidden = true; installEvt = null; });
+$("installApp").addEventListener("click", async () => {
+  if (!installEvt) return;
+  installEvt.prompt();
+  try { await installEvt.userChoice; } catch(e){}
+  installEvt = null; $("installApp").hidden = true;
+});
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+if (isIOS && !standalone) $("iosHint").hidden = false;
+
+/* ---------- Backup files ---------- */
+$("saveFile").addEventListener("click", async () => {
+  const name = "taipei-trip-backup-" + todayStr() + ".json";
+  const data = JSON.stringify(trip, null, 1);
+  const file = new File([data], name, {type:"application/json"});
+  // iOS: the share sheet is the reliable way to save into Files or Notes.
+  if (navigator.canShare && navigator.canShare({files:[file]})){
+    try { await navigator.share({files:[file], title:name}); return; }
+    catch(e){ if (e && e.name === "AbortError") return; }
+  }
+  const url = URL.createObjectURL(file);
+  const a = h("a",{href:url, download:name});
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+});
+$("loadFile").addEventListener("click", () => $("fileInput").click());
+$("fileInput").addEventListener("change", async (e) => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!f) return;
+  try { $("backupText").value = await f.text(); }
+  catch(err){ $("backupError").textContent = "This file couldn’t be read. Choose the .json backup file you saved earlier."; $("backupError").hidden = false; return; }
+  $("backupError").textContent = "File loaded. Tap “Replace trip with this text” twice to restore it.";
+  $("backupError").style.color = "var(--muted)";
+  $("backupError").hidden = false;
+});
+
+updateStatus();
+render();
+})();
+</script>
+</body>
+</html>

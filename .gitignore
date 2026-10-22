@@ -1,0 +1,12 @@
+# Windows "downloaded from the internet" markers created when copying files into WSL
+*:Zone.Identifier
+
+# Trip backups hold the real itinerary; it must never be committed
+taipei-trip-backup-*.json
+*.backup.json
+
+# OS and editor clutter
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

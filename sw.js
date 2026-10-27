@@ -1,5 +1,5 @@
 // Bump this version every time you change any file, so phones pick up the update.
-const CACHE_VERSION = "taipei-trip-v5";
+const CACHE_VERSION = "taipei-trip-v8";
 
 const APP_FILES = [
   "./",

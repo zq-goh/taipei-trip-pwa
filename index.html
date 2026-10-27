@@ -79,11 +79,8 @@ main{max-width:640px;margin:0 auto;padding:20px 16px 120px}
 .drift.d2{animation-duration:5.5s;animation-delay:-2s}
 .drift.d3{animation-duration:6.5s;animation-delay:-4s}
 @keyframes drift{from{transform:translate(0,2px)}to{transform:translate(1.5px,-4px)}}
-.bob{animation:bob .9s ease-in-out infinite alternate}
-@keyframes bob{to{transform:translateY(1px)}}
 .bear-art{display:block;width:120px;height:120px;margin:0 auto 12px}
 .lanterns-art{display:block;width:100%;max-width:320px;height:auto;margin:0 auto -6px}
-.taxi-art{display:block;width:150px;height:auto;margin:0 auto 10px}
 .day-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:22px}
 .kicker{margin:0 0 2px;color:var(--muted);font-size:.85rem;font-weight:700;letter-spacing:.02em}
 .day-sign{flex:none;width:64px;height:64px;border-radius:18px;transform:rotate(-3deg);background:var(--line);color:var(--on-line);display:grid;place-items:center;font-weight:800;font-size:1.5rem;letter-spacing:-0.02em}
@@ -92,6 +89,31 @@ main{max-width:640px;margin:0 auto;padding:20px 16px 120px}
 .day-sub{margin:4px 0 0;color:var(--muted);font-size:.92rem}
 .today-flag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--line);color:var(--on-line);font-size:.75rem;font-weight:700;vertical-align:2px}
 .text-btn{border:0;background:none;padding:6px 0;color:var(--muted);font-weight:600;font-size:.9rem;text-decoration:underline;text-underline-offset:3px}
+.head-links{display:flex;gap:18px;flex-wrap:wrap}
+.terminal .text-btn{margin-top:4px}
+
+/* Day changes slide in from the side they came from */
+body{overflow-x:clip}
+main.slide-from-right{animation:slide-r .22s ease-out}
+main.slide-from-left{animation:slide-l .22s ease-out}
+@keyframes slide-r{from{transform:translateX(28px);opacity:.3}}
+@keyframes slide-l{from{transform:translateX(-28px);opacity:.3}}
+.stop.flash .card{animation:flash 1.4s ease-out}
+@keyframes flash{from{box-shadow:0 0 0 4px var(--line)}}
+
+/* Stamp book (集章冊) */
+#bookDialog{overflow:auto}
+.book-total{margin:0 0 18px;font-weight:700}
+.book-day{margin:0 0 20px}
+.book-day-title{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 12px;font-size:1rem;font-weight:800}
+.book-day-title .code{display:grid;place-items:center;min-width:30px;height:24px;padding:0 6px;border-radius:6px;background:var(--c);color:var(--on);font-size:.75rem}
+.book-day-title .sub{color:var(--muted);font-weight:600;font-size:.85rem;white-space:nowrap}
+.book-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:14px 10px}
+.book-grid li{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.book-stamp{display:grid;place-items:center;width:64px;height:64px;padding:0;border-radius:50%;border:2px dashed var(--rule);background:transparent;color:var(--muted);font-weight:800;font-size:.8rem}
+.book-stamp.got{border:0;background:var(--c);color:var(--on);transform:rotate(var(--tilt))}
+.book-stamp.got .ring{display:grid;place-items:center;width:52px;height:52px;border:2px dashed currentColor;border-radius:50%}
+.book-name{max-width:100%;font-size:.75rem;color:var(--muted);text-align:center;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 
 /* The line */
 .line{list-style:none;margin:0;padding:0;position:relative}
@@ -149,17 +171,12 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
 .menu-list{display:grid;gap:8px}
 .menu-list .btn{text-align:left}
 .hint{font-size:.85rem;color:var(--muted);margin:6px 0 12px}
+.field .field-hint{display:block;margin:6px 0 0;font-weight:500}
+.field .field-hint[hidden]{display:none}
+.field .field-hint.bad{color:#C62828}
 .error{color:#C62828;font-size:.9rem;margin:6px 0 0}
 .mono-box{width:100%;min-height:160px;border:1.5px solid var(--rule);background:var(--bg);border-radius:10px;padding:10px;font-family:ui-monospace, Menlo, Consolas, monospace;font-size:.78rem}
 
-/* Show-to-driver */
-#showDialog{width:min(640px,calc(100vw - 16px))}
-.show{padding:28px 22px;text-align:center}
-.show .ask{margin:0 0 18px;font-size:1.05rem;color:var(--muted)}
-.show .big{margin:0;font-size:clamp(2.2rem,11vw,4rem);line-height:1.15;font-weight:700;word-break:break-word}
-.show .addr{margin:16px 0 0;font-size:1.3rem;font-weight:500}
-.show .en{margin:14px 0 22px;color:var(--muted)}
-.show .btns{justify-content:center}
 
 .banner{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:7;max-width:616px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;font-weight:600}
 .banner[hidden]{display:none}
@@ -263,22 +280,6 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
     </g>
   </svg>
 </template>
-<!-- Taipei's yellow taxi, for the Show driver screen. -->
-<template id="art-taxi">
-  <svg class="taxi-art" viewBox="0 0 140 64" aria-hidden="true">
-    <ellipse cx="70" cy="59" rx="58" ry="4" fill="#000" opacity=".12"/>
-    <g class="bob">
-      <rect x="58" y="6" width="26" height="9" rx="2" fill="#FFF" stroke="#C79A00"/>
-      <text x="71" y="13" font-size="6" font-weight="800" text-anchor="middle" fill="#2A2A2A" font-family="system-ui, sans-serif">TAXI</text>
-      <path d="M10 44Q10 34 20 33L38 31L52 18Q56 14 62 14H90Q96 14 100 18L112 31L124 33Q132 35 132 44V50H10Z" fill="#F6C400" stroke="#C79A00" stroke-width="1.5"/>
-      <path d="M45 31L55 20Q57 18 61 18H72V31Z" fill="#9ED3EA"/><path d="M76 18H89Q93 18 96 21L106 31H76Z" fill="#9ED3EA"/>
-      <path d="M74 31V48" stroke="#C79A00" stroke-width="1.2"/>
-      <circle cx="127" cy="40" r="2.5" fill="#FFF7D6"/><rect x="10" y="38" width="3" height="5" fill="#D7262E"/>
-    </g>
-    <g fill="#2A2A2A"><circle cx="36" cy="50" r="9"/><circle cx="106" cy="50" r="9"/></g>
-    <g fill="#C9C9C9"><circle cx="36" cy="50" r="4"/><circle cx="106" cy="50" r="4"/></g>
-  </svg>
-</template>
 <!-- Theme toggle icons: shows the theme you'll switch to. -->
 <template id="art-sun">
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -310,8 +311,9 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
   <div class="sheet">
     <h2 id="stopDialogTitle">Add stop</h2>
     <label class="field"><span>Place</span><input id="fName" required placeholder="Longshan Temple"></label>
-    <label class="field"><span>Chinese name (shown to drivers)</span><input id="fZh" lang="zh-Hant" placeholder="艋舺龍山寺"></label>
-    <label class="field"><span>Address (optional)</span><input id="fAddr" placeholder="Paste from Google Maps"></label>
+    <label class="field"><span>Chinese name</span><input id="fZh" lang="zh-Hant" placeholder="艋舺龍山寺"></label>
+    <label class="field"><span>Address or Google Maps link (adds a Navigate button)</span><input id="fAddr" placeholder="Paste a Google Maps share link or an address" aria-describedby="addrHint">
+      <span class="hint field-hint" id="addrHint" hidden></span></label>
     <div class="row">
       <label class="field"><span>Time</span><input id="fTime" type="time"></label>
       <label class="field"><span>Type</span><select id="fCat"></select></label>
@@ -393,16 +395,15 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
   </div>
 </dialog>
 
-<!-- Show to driver -->
-<dialog id="showDialog" aria-label="Show this to your driver">
-  <div class="show">
-    <p class="ask" lang="zh-Hant">請帶我到這裡 <span lang="en">(Please take me here)</span></p>
-    <p class="big" id="showZh" lang="zh-Hant"></p>
-    <p class="addr" id="showAddr"></p>
-    <p class="en" id="showEn"></p>
+<!-- Stamp book -->
+<dialog id="bookDialog" aria-labelledby="bookTitle">
+  <div class="sheet">
+    <h2 id="bookTitle"><span lang="zh-Hant">集章冊</span> · Stamp book</h2>
+    <p class="book-total" id="bookTotal"></p>
+    <div id="bookBody"></div>
     <div class="btns">
-      <a class="btn primary" id="showMap" target="_blank" rel="noopener" style="text-decoration:none">Open in Google Maps</a>
-      <button class="btn" type="button" data-close>Close</button>
+      <span class="spacer"></span>
+      <button class="btn primary" type="button" data-close>Close</button>
     </div>
   </div>
 </dialog>
@@ -478,10 +479,21 @@ function greeting(){
   return "下次見, 台北! See you again, Taipei 👋";
 }
 function art(name){ return $("art-"+name).content.firstElementChild.cloneNode(true); }
-function mapsUrl(s){
-  const q = s.address || s.zh || (s.name + " Taipei");
-  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+// The address field holds either a plain address or a Google Maps link. Returns the link (always https) if the
+// text contains one, else null. Only Google Maps hosts are accepted, so a pasted or restored value can never
+// turn the Navigate href into another site or a javascript: URL.
+const GOOGLE_TLD = "(com|[a-z]{2}|com?\\.[a-z]{2})"; // google.com, google.de, google.com.tw, google.co.uk
+const MAPS_HOST = new RegExp("^(maps\\.app\\.goo\\.gl|maps\\.google\\." + GOOGLE_TLD + ")$");
+const GOOGLE_HOST = new RegExp("^(www\\.)?(google\\." + GOOGLE_TLD + "|goo\\.gl)$");
+function mapsLink(text){
+  const m = /https?:\/\/[^\s<>"]+/i.exec(text || "");
+  if (!m) return null;
+  let u; try { u = new URL(m[0]); } catch(e){ return null; }
+  const host = u.hostname.toLowerCase();
+  if (!MAPS_HOST.test(host) && !(GOOGLE_HOST.test(host) && u.pathname.startsWith("/maps"))) return null;
+  return "https://" + u.host + u.pathname + u.search + u.hash;
 }
+function navUrl(address){ return mapsLink(address) || "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address); }
 function armConfirm(btn, label, action){
   // Two-tap confirm for destructive actions (no browser confirm() inside the viewer).
   btn.addEventListener("click", () => {
@@ -498,7 +510,7 @@ function sampleTrip(){
     version:1, name:"Taipei trip", updatedAt:0,
     days:[
       {id:uid(), title:"Arrival and Xinyi", date:"", stops:[
-        stop("15:00","Check in at hotel","", "Stay","Replace with your hotel. Put its Chinese name above so you can show it to taxi drivers."),
+        stop("15:00","Check in at hotel","", "Stay","Replace with your hotel. Paste its address to get a Navigate button."),
         stop("17:00","Taipei 101","台北101","Sight","Observatory tickets: check prices and whether to book ahead."),
         stop("19:30","Raohe Night Market","饒河街觀光夜市","Food","Pepper buns near the entrance.")
       ]},
@@ -612,7 +624,7 @@ function render(){
     ...trip.days.map((d,i) => {
       const L = lineFor(i);
       return h("button", {class:"day-tab", role:"tab", "aria-selected": String(d.id===day.id), style:"--c:"+L.c+";--on:"+L.on,
-        onclick:() => { currentDayId = d.id; ui.day = d.id; saveUi(); render(); window.scrollTo({top:0}); }},
+        onclick:() => showDay(d.id, i > idx ? "right" : i < idx ? "left" : null)},
         h("span",{class:"code", text:L.code}),
         h("span",{}, "Day "+(i+1)),
         d.date ? h("span",{class:"sub", text: d.date===t ? "Today" : fmtDate(d.date)}) : null
@@ -634,7 +646,9 @@ function render(){
       h("p",{class:"kicker"}, h("span",{lang:"zh-Hant", text:"第"+zhNum(idx+1)+"天"}), " · Day "+(idx+1)),
       h("h2",{class:"day-title"}, day.title || ("Day "+(idx+1)), day.date===t ? h("span",{class:"today-flag", text:"Today"}) : null),
       h("p",{class:"day-sub", text: subParts.join(", ") || "No date set"}),
-      h("button",{class:"text-btn", onclick:openDayDialog}, "Edit day")
+      h("div",{class:"head-links"},
+        h("button",{class:"text-btn", onclick:openDayDialog}, "Edit day"),
+        h("button",{class:"text-btn", onclick:openBook}, "📖 Stamp book"))
     )
   );
 
@@ -656,7 +670,8 @@ function render(){
         allDone ? art("lanterns") : null,
         art("skyline"),
         allDone ? h("p",{}, h("span",{lang:"zh-Hant", text:"辛苦了!"}), " All stamps collected 🎉")
-                : h("p",{}, h("span",{lang:"zh-Hant", text:"終點站"}), " · End of the line"))
+                : h("p",{}, h("span",{lang:"zh-Hant", text:"終點站"}), " · End of the line"),
+        allDone ? h("button",{class:"text-btn", onclick:openBook}, "Open your stamp book") : null)
     ];
   }
   const hero = h("div",{class:"hero"}, art("hero"), h("p",{class:"greet", text:greeting()}));
@@ -666,7 +681,7 @@ function render(){
 
 function stopItem(s, i, line, isNext){
   const code = line.code + String(i+1).padStart(2,"0");
-  return h("li",{class:"stop" + (s.done?" done":"") + (isNext?" next":"")},
+  return h("li",{class:"stop" + (s.done?" done":"") + (isNext?" next":""), "data-stop":s.id},
     h("button",{class:"badge", "aria-pressed":String(!!s.done), "aria-label":(s.done?"Mark not done: ":"Mark done: ")+s.name,
       onclick:() => { s.done = !s.done; justStamped = s.done ? s.id : null; commit(); }},
       s.done ? h("span",{class:"stamp" + (s.id===justStamped ? " fresh" : ""), lang:"zh-Hant", text:"已到"}) : code),
@@ -680,8 +695,7 @@ function stopItem(s, i, line, isNext){
       s.zh ? h("p",{class:"zh", lang:"zh-Hant", text:s.zh}) : null,
       s.notes ? h("p",{class:"notes", text:s.notes}) : null,
       h("div",{class:"actions"},
-        h("a",{class:"chip primary", href:mapsUrl(s), target:"_blank", rel:"noopener"}, "Navigate"),
-        (s.zh || s.address) ? h("button",{class:"chip", onclick:() => openShow(s)}, "Show driver") : null,
+        s.address ? h("a",{class:"chip primary", href:navUrl(s.address), target:"_blank", rel:"noopener"}, "Navigate") : null,
         h("button",{class:"chip", onclick:() => openStopDialog(s.id)}, "Edit")
       )
     )
@@ -709,16 +723,31 @@ function openStopDialog(stopId){
   $("fTime").value = s ? (s.time||"") : "";
   $("fCat").value = s ? (s.category||"Sight") : "Sight";
   $("fNotes").value = s ? (s.notes||"") : "";
+  updateAddrHint();
   $("stopEditOnly").hidden = !s;
   $("stopError").hidden = true;
   openDlg("stopDialog");
   setTimeout(() => { if (!s) $("fName").focus(); }, 50);
 }
+// Says what Navigate will do with the address field's current text.
+function updateAddrHint(){
+  const v = $("fAddr").value.trim(), hint = $("addrHint");
+  const link = mapsLink(v), otherLink = !link && /https?:\/\//i.test(v);
+  hint.hidden = !v;
+  hint.classList.toggle("bad", otherLink);
+  hint.textContent = link ? "📍 Google Maps link: Navigate opens this exact place."
+    : otherLink ? "This link isn’t from Google Maps. Use Share in Google Maps, or type the address."
+    : "Navigate will search Google Maps for this address.";
+}
+$("fAddr").addEventListener("input", updateAddrHint);
 $("saveStop").addEventListener("click", () => {
   const name = $("fName").value.trim();
   if (!name){ $("stopError").textContent = "Add a place name to save this stop."; $("stopError").hidden = false; $("fName").focus(); return; }
+  // Keep just the link when Google Maps' share text ("Place name https://maps.app.goo.gl/…") is pasted.
+  const addrText = $("fAddr").value.trim(), link = mapsLink(addrText);
+  if (!link && /https?:\/\//i.test(addrText)){ $("stopError").textContent = "The address has a link that isn’t from Google Maps. Paste a Google Maps link or type the address."; $("stopError").hidden = false; $("fAddr").focus(); return; }
   const day = currentDay();
-  const fields = {name, zh:$("fZh").value.trim(), address:$("fAddr").value.trim(), time:$("fTime").value, category:$("fCat").value, notes:$("fNotes").value.trim()};
+  const fields = {name, zh:$("fZh").value.trim(), address:link || addrText, time:$("fTime").value, category:$("fCat").value, notes:$("fNotes").value.trim()};
   if (editingStopId){
     Object.assign(day.stops.find(x => x.id===editingStopId), fields);
   } else {
@@ -791,6 +820,75 @@ function addDay(){
   commit();
 }
 
+/* ---------- Day navigation: tabs, swipe, arrow keys ---------- */
+function showDay(id, from){
+  currentDayId = id; ui.day = id; saveUi(); render(); window.scrollTo({top:0});
+  if (!from) return;
+  const m = $("main");
+  m.classList.remove("slide-from-left", "slide-from-right");
+  void m.offsetWidth; // restart the animation
+  m.classList.add("slide-from-" + from);
+}
+$("main").addEventListener("animationend", (e) => { if (e.target === $("main")) e.target.classList.remove("slide-from-left", "slide-from-right"); });
+function stepDay(dir){
+  const j = trip.days.findIndex(d => d.id === currentDayId) + dir;
+  if (j >= 0 && j < trip.days.length) showDay(trip.days[j].id, dir > 0 ? "right" : "left");
+}
+// A quick, mostly horizontal swipe changes day; vertical scrolling is untouched (passive listeners).
+// Swipes starting near the screen edge are left to the browser's own back/forward gestures.
+let swipe = null;
+$("main").addEventListener("touchstart", (e) => {
+  const t = e.touches[0];
+  swipe = (e.touches.length === 1 && t.clientX > 24 && t.clientX < window.innerWidth - 24) ? {x:t.clientX, y:t.clientY, at:Date.now()} : null;
+}, {passive:true});
+$("main").addEventListener("touchcancel", () => { swipe = null; }, {passive:true});
+$("main").addEventListener("touchend", (e) => {
+  if (!swipe) return;
+  const t = e.changedTouches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y, quick = Date.now() - swipe.at < 700;
+  swipe = null;
+  if (quick && Math.abs(dx) > 60 && Math.abs(dx) > 2 * Math.abs(dy)) stepDay(dx < 0 ? 1 : -1);
+}, {passive:true});
+document.addEventListener("keydown", (e) => {
+  if ((e.key !== "ArrowLeft" && e.key !== "ArrowRight") || e.altKey || e.ctrlKey || e.metaKey) return;
+  if (document.querySelector("dialog[open]") || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+  stepDay(e.key === "ArrowRight" ? 1 : -1);
+});
+
+/* ---------- Stamp book ---------- */
+function openBook(){
+  const all = trip.days.flatMap(d => d.stops), got = all.filter(s => s.done).length;
+  $("bookTotal").textContent = !all.length ? "No stops planned yet."
+    : got === all.length ? "全部集滿! Every stamp collected (" + got + ") 🎉"
+    : got + " of " + all.length + " stamps collected";
+  $("bookBody").replaceChildren(...trip.days.map((d,i) => {
+    const L = lineFor(i);
+    return h("section",{class:"book-day", style:"--c:"+L.c+";--on:"+L.on},
+      h("h3",{class:"book-day-title"},
+        h("span",{class:"code", text:L.code}),
+        h("span",{text: d.title || "Day "+(i+1)}),
+        d.date ? h("span",{class:"sub", text:fmtDate(d.date)}) : null),
+      d.stops.length ? h("ol",{class:"book-grid"}, d.stops.map((s,j) => {
+        const code = L.code + String(j+1).padStart(2,"0");
+        return h("li",{},
+          // Tilt varies per stamp so the page looks hand-stamped.
+          h("button",{class:"book-stamp" + (s.done ? " got" : ""), type:"button", style:"--tilt:" + ((i*7 + j*13) % 21 - 10) + "deg",
+            "aria-label": (s.done ? "Collected: " : "Not collected yet: ") + s.name + ". Go to this stop", onclick:() => jumpToStop(d.id, s.id)},
+            h("span",{class:"ring", text:code})),
+          h("span",{class:"book-name", lang: s.zh ? "zh-Hant" : null, text: s.zh || s.name}));
+      })) : h("p",{class:"hint", text:"No stops on this day yet."}));
+  }));
+  openDlg("bookDialog");
+}
+function jumpToStop(dayId, stopId){
+  $("bookDialog").close();
+  showDay(dayId);
+  const el = document.querySelector('[data-stop="' + CSS.escape(stopId) + '"]');
+  if (!el) return;
+  el.scrollIntoView({block:"center"});
+  el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), 1400);
+}
+
 /* ---------- Trip menu ---------- */
 $("menuBtn").addEventListener("click", () => { $("tName").value = trip.name || ""; openDlg("menuDialog"); });
 $("saveMenu").addEventListener("click", () => {
@@ -825,17 +923,6 @@ armConfirm($("restoreBackup"), "Replace trip with this text", () => {
   $("backupDialog").close();
   commit();
 });
-
-/* ---------- Show driver ---------- */
-document.querySelector("#showDialog .show").prepend(art("taxi"));
-function openShow(s){
-  $("showZh").textContent = s.zh || s.name;
-  $("showAddr").textContent = s.address || "";
-  $("showAddr").hidden = !s.address;
-  $("showEn").textContent = s.zh ? s.name : "";
-  $("showMap").href = mapsUrl(s);
-  openDlg("showDialog");
-}
 
 /* ---------- Theme ---------- */
 // Follows the phone's setting until the toggle is used; then ui.theme ("light"/"dark") wins.

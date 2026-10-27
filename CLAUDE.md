@@ -16,11 +16,19 @@ Personal itinerary app for a Taipei trip (November 2026). Used on a phone during
   Chinese is always paired with English so the app stays readable.
 - Illustrations are hand-drawn inline SVG in `<template id="art-*">`, cloned with `art(name)`: day banner (temple roof
   with swallowtail ridges, red lanterns, Taipei 101, sky lanterns), black bear with bubble tea (empty day),
-  rising sky lanterns with 平安 and plum blossoms (all done), yellow taxi (Show driver). Decorative only (aria-hidden).
-- "Show driver" shows the Chinese name and address full screen with 請帶我到這裡.
-- "Navigate" opens a Google Maps search URL (needs connection; that's accepted).
+  rising sky lanterns with 平安 and plum blossoms (all done). Decorative only (aria-hidden).
+- "Navigate" appears only when a stop has an address (needs connection; that's accepted). `address` holds either a
+  plain address (opens a Google Maps search) or a Google Maps link (opened directly). `mapsLink()` accepts only
+  Google Maps hosts (maps.app.goo.gl, goo.gl/maps, google.<tld>/maps, maps.google.<tld>) and rebuilds the URL as
+  https; anything else is treated as search text, so restored data can't produce a non-Google or javascript: href.
+  The editor keeps just the link from pasted share text and blocks saving other sites' links.
+- No "Show driver" screen: removed at the owner's request (Oct 2026). The Chinese name still shows on each card.
 - System fonts only, so nothing loads from the network.
 - Destructive actions use two-tap confirm buttons, not `confirm()`.
+- Stamp book (集章冊) dialog: every stop as a stamp, grouped by day; tapping one jumps to that stop. Opened from
+  "📖 Stamp book" by Edit day and from the all-done link. Read-only view of `done`; marking done stays on the badge.
+- Swipe left/right on `main` (or arrow keys) changes day with a short slide. Swipes from within 24px of the screen
+  edge are ignored so the browser's back gesture still works.
 - Header sun/moon button toggles light/dark. It follows the phone's setting until first used, then `ui.theme`
   ("light"/"dark", in `taipei-trip:ui`, not in trip backups) sets `data-theme` on `<html>`. A tiny `<head>` script
   applies it before first paint.

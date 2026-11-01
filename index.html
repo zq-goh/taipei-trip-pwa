@@ -35,6 +35,7 @@ try { const t = (JSON.parse(localStorage.getItem("taipei-trip:ui")) || {}).theme
   color-scheme: dark;
 }
 *,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none !important} /* component display rules must never un-hide an element */
 html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 120px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
@@ -51,6 +52,7 @@ button{cursor:pointer}
 .trip-name{margin:0;font-size:1.25rem;line-height:1.2;font-weight:800;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sync{display:block;font-size:.78rem;color:var(--muted);white-space:nowrap}
 .icon-btn{border:1px solid var(--rule);background:transparent;border-radius:999px;width:40px;height:40px;display:grid;place-items:center;font-size:1.2rem;line-height:1}
+.icon-btn[hidden]{display:none}
 
 /* Day tabs */
 .days{display:flex;gap:8px;overflow-x:auto;padding:12px 0 12px;scrollbar-width:none}
@@ -87,7 +89,7 @@ main{max-width:640px;margin:0 auto;padding:20px 16px 120px}
 .day-sub{margin:4px 0 0;color:var(--muted);font-size:.92rem}
 .today-flag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--line);color:var(--on-line);font-size:.75rem;font-weight:700;vertical-align:2px}
 .text-btn{border:0;background:none;padding:6px 0;color:var(--muted);font-weight:600;font-size:.9rem;text-decoration:underline;text-underline-offset:3px}
-.head-links{display:flex;gap:18px;flex-wrap:wrap}
+.head-links{display:flex;gap:0 18px;flex-wrap:wrap}
 .terminal .text-btn{margin-top:4px}
 
 /* Day changes slide in from the side they came from */
@@ -162,6 +164,12 @@ dialog{border:0;padding:0;border-radius:18px;background:var(--surface);color:var
 dialog::backdrop{background:rgba(8,12,16,.55)}
 .sheet{padding:20px}
 .sheet h2{margin:0 0 16px;font-size:1.25rem;font-weight:800}
+.doc-pic{display:block;width:100%;max-height:52dvh;object-fit:contain;border-radius:12px;margin:0 0 14px;background:var(--soft)}
+.doc-msg{margin:0 0 16px;font-size:1.08rem;line-height:1.6;white-space:pre-line;overflow-wrap:anywhere}
+.doc-btns{justify-content:center}
+.pic-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+.pic-row img{width:64px;height:64px;object-fit:cover;border-radius:10px;border:1.5px solid var(--rule)}
+.pic-row img[hidden]{display:none}
 .field{display:block;margin-bottom:14px}
 .field span{display:block;font-size:.85rem;font-weight:600;color:var(--muted);margin-bottom:4px}
 .field input,.field select,.field textarea{width:100%;border:1.5px solid var(--rule);background:var(--bg);border-radius:10px;padding:10px 12px}
@@ -171,6 +179,8 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
 .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
 .btn{border:1.5px solid var(--rule);background:transparent;border-radius:10px;padding:10px 16px;font-weight:700}
 .btn.primary{background:var(--line);border-color:var(--line);color:var(--on-line)}
+a.btn{display:inline-block;text-decoration:none;color:inherit}
+a.btn.primary{color:var(--on-line)}
 .btn.danger{color:#C62828;border-color:currentColor}
 .btn.arming{background:#C62828;color:#fff;border-color:#C62828}
 .spacer{flex:1}
@@ -198,6 +208,11 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
         <h1 class="trip-name" id="tripName">Taipei trip</h1>
         <span class="sync" id="sync" aria-live="polite">Saved on this phone</span>
       </div>
+      <button class="icon-btn" id="docBtn" type="button" hidden aria-label="原版行程 Original plan" title="原版行程 Original plan">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+          <path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8Z"/><path d="M14 3v5h5M8.5 13h7M8.5 17h5"/>
+        </svg>
+      </button>
       <button class="icon-btn" id="themeBtn" type="button"></button>
       <button class="icon-btn" id="menuBtn" aria-label="Trip settings">⋯</button>
     </div>
@@ -365,6 +380,17 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
   <div class="sheet">
     <h2 id="menuTitle">Trip settings</h2>
     <label class="field"><span>Trip name</span><input id="tName"></label>
+    <label class="field"><span>Original plan: Google Drive link (adds a 📄 button at the top that opens a popup)</span><input id="tDoc" inputmode="url" placeholder="Paste the Drive share link of the PDF" aria-describedby="tDocError"></label>
+    <p class="error" id="tDocError" hidden></p>
+    <label class="field"><span>Message in the Original plan popup (family see it too)</span><textarea id="tMsg" placeholder="A note of thanks for the family"></textarea></label>
+    <div class="field"><span>Picture in the popup</span></div>
+    <div class="pic-row">
+      <img id="tPicPreview" alt="Chosen picture" hidden>
+      <button class="btn" type="button" id="tPicPick">Choose picture</button>
+      <button class="btn danger" type="button" id="tPicRemove" hidden>Remove</button>
+      <input type="file" id="tPicFile" accept="image/*" hidden>
+    </div>
+    <p class="error" id="tPicError" hidden></p>
     <div class="menu-list">
       <button class="btn primary" type="button" id="installApp" hidden>Install on this device</button>
       <p class="hint" id="iosHint" hidden>To install: tap the Share button in Safari, then “Add to Home Screen”.</p>
@@ -377,6 +403,19 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
     <div class="btns" style="margin-top:16px">
       <span class="spacer"></span>
       <button class="btn primary" type="button" id="saveMenu">Done</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Original plan popup -->
+<dialog id="docDialog" aria-labelledby="docTitle">
+  <div class="sheet">
+    <h2 id="docTitle"><span lang="zh-Hans">原版行程</span> · Original plan</h2>
+    <img class="doc-pic" id="docPic" alt="" hidden>
+    <p class="doc-msg" id="docMsg" hidden></p>
+    <div class="btns doc-btns">
+      <a class="btn primary" id="docOpen" target="_blank" rel="noopener" hidden><span lang="zh-Hans">打开链接</span> · Open link</a>
+      <button class="btn" type="button" data-close>Close</button>
     </div>
   </div>
 </dialog>
@@ -549,6 +588,36 @@ function mapsLink(text){
   if (!MAPS_HOST.test(host) && !(GOOGLE_HOST.test(host) && u.pathname.startsWith("/maps"))) return null;
   return "https://" + u.host + u.pathname + u.search + u.hash;
 }
+// Link to the original itinerary file. Only Google Drive / Docs links are accepted (rebuilt as https), so a
+// restored or shared trip can't produce a non-Google or javascript: href.
+function driveLink(text){
+  const m = /https?:\/\/[^\s<>"]+/i.exec(typeof text === "string" ? text : "");
+  if (!m) return null;
+  let u; try { u = new URL(m[0]); } catch(e){ return null; }
+  if (!/^(drive|docs)\.google\.com$/i.test(u.hostname)) return null;
+  return "https://" + u.host + u.pathname + u.search + u.hash;
+}
+// Popup picture: a small JPEG/PNG/WebP data URL kept inside the trip (so it is encrypted for family and works offline).
+const PIC_MAX = 1000000;
+function picOk(v){ return typeof v === "string" && v.length <= PIC_MAX && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(v); }
+// Shrinks a chosen photo to at most 900px on its longest side as JPEG, lowering quality until it is under ~300 KB.
+function shrinkPicture(file){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, 900 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(img.naturalWidth * scale)); c.height = Math.max(1, Math.round(img.naturalHeight * scale));
+      const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+      let q = 0.82, out = c.toDataURL("image/jpeg", q);
+      while (out.length > 300000 && q > 0.4){ q -= 0.1; out = c.toDataURL("image/jpeg", q); }
+      picOk(out) ? resolve(out) : reject(new Error("big"));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("read")); };
+    img.src = url;
+  });
+}
 function navUrl(address){ return mapsLink(address) || "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address); }
 function armConfirm(btn, label, action){
   // Two-tap confirm for destructive actions (no browser confirm() inside the viewer).
@@ -622,7 +691,7 @@ function checkTrip(t){
     }
     days.push(Object.assign({}, d, {id:freshId(d.id), title:str(d.title), date, stops}));
   }
-  return {trip: Object.assign({}, t, {version:1, name:str(t.name).trim() || "Taipei trip", updatedAt:Number(t.updatedAt) || 0, days})};
+  return {trip: Object.assign({}, t, {version:1, name:str(t.name).trim() || "Taipei trip", docUrl:str(t.docUrl), docMsg:str(t.docMsg), docPic: picOk(t.docPic) ? t.docPic : "", updatedAt:Number(t.updatedAt) || 0, days})};
 }
 
 /* ---------- State ---------- */
@@ -677,6 +746,7 @@ function commit(){
 function render(){
   if (!trip){ renderLocked(); return; }
   $("tripName").textContent = trip.name || "Taipei trip";
+  $("docBtn").hidden = !(driveLink(trip.docUrl) || (trip.docMsg || "").trim() || picOk(trip.docPic));
   document.title = trip.name || "Taipei trip";
   if (!trip.days.length){ trip.days.push({id:uid(), title:"Day 1", date:"", stops:[]}); }
   if (!currentDay()) currentDayId = trip.days[0].id;
@@ -970,12 +1040,48 @@ function jumpToStop(dayId, stopId){
 /* ---------- Trip menu ---------- */
 $("menuBtn").addEventListener("click", () => {
   if (VIEW){ $("viewNote").hidden = true; openDlg("viewDialog"); return; }
-  $("tName").value = trip.name || ""; openDlg("menuDialog");
+  $("tName").value = trip.name || ""; $("tDoc").value = trip.docUrl || ""; $("tDocError").hidden = true;
+  $("tMsg").value = trip.docMsg || ""; pendingPic = picOk(trip.docPic) ? trip.docPic : ""; showPendingPic(); $("tPicError").hidden = true;
+  openDlg("menuDialog");
 });
 $("saveMenu").addEventListener("click", () => {
   const n = $("tName").value.trim() || "Taipei trip";
+  const docText = $("tDoc").value.trim(), doc = docText ? driveLink(docText) : "";
+  if (doc === null){
+    $("tDocError").textContent = "That isn’t a Google Drive link. In Drive, tap Share, then Copy link, and paste it here (or clear the box).";
+    $("tDocError").hidden = false; $("tDoc").focus(); return;
+  }
+  const msg = $("tMsg").value.trim();
   $("menuDialog").close();
-  if (n !== trip.name){ trip.name = n; commit(); }
+  if (n !== trip.name || doc !== (trip.docUrl || "") || msg !== (trip.docMsg || "") || pendingPic !== (trip.docPic || "")){
+    trip.name = n; trip.docUrl = doc; trip.docMsg = msg; trip.docPic = pendingPic; commit();
+  }
+});
+let pendingPic = "";
+function showPendingPic(){
+  $("tPicPreview").hidden = $("tPicRemove").hidden = !pendingPic;
+  if (pendingPic) $("tPicPreview").src = pendingPic; else $("tPicPreview").removeAttribute("src");
+  $("tPicPick").textContent = pendingPic ? "Change picture" : "Choose picture";
+}
+$("tPicPick").addEventListener("click", () => $("tPicFile").click());
+$("tPicFile").addEventListener("change", async (e) => {
+  const f = e.target.files && e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  $("tPicError").hidden = true;
+  try { pendingPic = await shrinkPicture(f); showPendingPic(); }
+  catch(err){ $("tPicError").textContent = "That picture couldn’t be used. Try a JPEG or PNG photo."; $("tPicError").hidden = false; }
+});
+$("tPicRemove").addEventListener("click", () => { pendingPic = ""; showPendingPic(); });
+
+/* ---------- Original plan popup ---------- */
+$("docBtn").addEventListener("click", () => {
+  const link = driveLink(trip.docUrl), msg = (trip.docMsg || "").trim(), pic = picOk(trip.docPic) ? trip.docPic : "";
+  $("docPic").hidden = !pic;
+  if (pic) $("docPic").src = pic; else $("docPic").removeAttribute("src");
+  $("docMsg").hidden = !msg; $("docMsg").textContent = msg;
+  $("docOpen").hidden = !link;
+  if (link) $("docOpen").href = link; else $("docOpen").removeAttribute("href");
+  openDlg("docDialog");
 });
 $("addDay").addEventListener("click", () => { $("menuDialog").close(); addDay(); });
 armConfirm($("loadSample"), "Replace with sample trip", () => { trip = sampleTrip(); currentDayId = trip.days[0].id; $("menuDialog").close(); commit(); });
@@ -1093,6 +1199,7 @@ $("saveShare").addEventListener("click", async () => {
 // Family side: lock screen, unlock, automatic refresh, leave.
 function renderLocked(msg){
   $("tripName").textContent = document.title = "Shared Taipei trip";
+  $("docBtn").hidden = true;
   $("days").replaceChildren();
   const pass = h("input",{type:"password", autocomplete:"current-password"});
   const err = h("p",{class:"error", role:"alert", text:msg || "", hidden:!msg});

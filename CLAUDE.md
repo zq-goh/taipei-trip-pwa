@@ -10,7 +10,7 @@ Personal itinerary app for a Taipei trip (November 2026). Used on a phone during
   the app (⋯ > Share with family) and uploaded to the repo. The app fetches it network-first; it is never precached.
 - Data: one JSON object in `localStorage` under key `taipei-trip:v1`; UI state under `taipei-trip:ui`;
   family view's decrypted copy and passphrase under `taipei-trip:view` (that device only).
-  Shape: `{version, name, updatedAt, days:[{id, title, date:"YYYY-MM-DD", stops:[{id, time:"HH:MM", name, zh, en, address, category, notes, done}]}]}`
+  Shape: `{version, name, docUrl, docMsg, docPic, updatedAt, days:[{id, title, date:"YYYY-MM-DD", stops:[{id, time:"HH:MM", name, zh, en, address, category, notes, done}]}]}`
 
 ## Design decisions (keep unless asked)
 - Each day takes a warm colour (vermilion, amber, plum, persimmon, oolong tea, rose; all white-text readable, owner's
@@ -31,6 +31,13 @@ Personal itinerary app for a Taipei trip (November 2026). Used on a phone during
 - Stops may carry `en`: an optional small English line under the place name, so a trip written in Chinese (the
   owner's real one is in Simplified Chinese for senior family members, Nov 2026) still has English. Old backups
   without it restore fine.
+- Header 📄 icon button ("原版行程 Original plan", next to the theme toggle) opens a popup with the owner's thank-you
+  message (`trip.docMsg`, plain text, line breaks kept), an optional picture (`trip.docPic`) and an "Open link" button
+  to the original itinerary PDF on Google Drive (`trip.docUrl`). All three are set in Trip settings and live in the
+  trip, so they reach family only inside the encrypted `trip.enc.json` and work offline (except opening the link);
+  never commit them in readable form. The button shows when any of the three is set. `driveLink()` accepts only
+  drive.google.com / docs.google.com and rebuilds the URL as https. The picture is shrunk in the app (max 900px JPEG,
+  ~300 KB) and `picOk()` accepts only jpeg/png/webp base64 data URLs up to 1 MB, so restored data can't load anything else.
 - No "Show driver" screen: removed at the owner's request (Oct 2026). The Chinese name still shows on each card.
 - System fonts only, so nothing loads from the network.
 - Destructive actions use two-tap confirm buttons, not `confirm()`.

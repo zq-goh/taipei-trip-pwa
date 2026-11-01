@@ -692,7 +692,8 @@ function render(){
   // Day tabs
   const t = todayStr();
   const nav = $("days");
-  nav.replaceChildren(
+  // replaceChildren() would print a null as the text "null", so drop the hidden + Day button first.
+  nav.replaceChildren(...[
     ...trip.days.map((d,i) => {
       const L = lineFor(i);
       return h("button", {class:"day-tab", role:"tab", "aria-selected": String(d.id===day.id), style:"--c:"+L.c+";--on:"+L.on,
@@ -703,7 +704,7 @@ function render(){
       );
     }),
     VIEW ? null : h("button",{class:"day-tab add", onclick:addDay, "aria-label":"Add a day"}, "+ Day")
-  );
+  ].filter(Boolean));
   const sel = nav.querySelector('[aria-selected="true"]');
   if (sel && sel.scrollIntoView) sel.scrollIntoView({block:"nearest", inline:"nearest"});
 

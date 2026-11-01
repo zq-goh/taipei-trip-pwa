@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Taipei trip</title>
-<meta name="theme-color" content="#E3002C">
+<meta name="theme-color" content="#D3301E">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -13,13 +13,14 @@
 <link rel="icon" href="./icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
 <script>
-// Apply a saved light/dark choice before first paint, so the page doesn't flash the other theme.
-try { const t = (JSON.parse(localStorage.getItem("taipei-trip:ui")) || {}).theme; if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch(e){}
+// Apply a saved dark choice before first paint, so the page doesn't flash light first.
+try { const t = (JSON.parse(localStorage.getItem("taipei-trip:ui")) || {}).theme; if (t === "dark") document.documentElement.dataset.theme = t; } catch(e){}
 </script>
 <style>
 :root{
   --bg:#FBF5EC; --surface:#FFFFFF; --ink:#2B2118; --muted:#76665A; --rule:#EADFCF; --soft:#F5EDE1;
-  --line:#E3002C; --on-line:#FFFFFF;
+  --line:#D3301E; --on-line:#FFFFFF;
+  --gold:#F0C060; --gold-ink:#FFF1CC;
   --sky1:#FFE6CC; --sky2:#FBF5EC; --far:#E9D6BE; --tower:#D7C0A2; --hill:#E4D2BA;
   --sans:ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --zh:"PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
@@ -27,13 +28,6 @@ try { const t = (JSON.parse(localStorage.getItem("taipei-trip:ui")) || {}).theme
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#15110D; --surface:#211B15; --ink:#F3EADF; --muted:#B4A493; --rule:#3A3027; --soft:#2C241C;
-    --sky1:#1C2140; --sky2:#191512; --far:#2E2A3C; --tower:#423B52; --hill:#241E19;
-    color-scheme: dark;
-  }
 }
 :root[data-theme="dark"]{
   --bg:#15110D; --surface:#211B15; --ink:#F3EADF; --muted:#B4A493; --rule:#3A3027; --soft:#2C241C;
@@ -62,7 +56,11 @@ button{cursor:pointer}
 .days{display:flex;gap:8px;overflow-x:auto;padding:12px 0 12px;scrollbar-width:none}
 .days::-webkit-scrollbar{display:none}
 .day-tab{flex:none;display:flex;align-items:center;gap:8px;border:1.5px solid var(--rule);background:var(--surface);border-radius:999px;padding:6px 14px 6px 6px;font-weight:600;font-size:.9rem}
-.day-tab .code{display:grid;place-items:center;min-width:30px;height:24px;padding:0 6px;border-radius:6px;background:var(--c);color:var(--on);font-size:.75rem;font-weight:800}
+/* 斗方: the diamond of red paper with a gold border hung on doors at Lunar New Year. Holds the day's numeral. */
+.doufang{--s:30px;position:relative;isolation:isolate;flex:none;display:grid;place-items:center;width:var(--s);height:var(--s);color:var(--gold-ink);font-family:var(--zh);font-size:calc(var(--s)*.42);font-weight:800;line-height:1}
+.doufang::before{content:"";position:absolute;z-index:-1;inset:14.6%;border-radius:2px;transform:rotate(45deg);background:var(--c);
+  box-shadow:inset 0 0 0 calc(var(--s)*.05) var(--c), inset 0 0 0 calc(var(--s)*.08) var(--gold), 0 1px 2px rgba(0,0,0,.18)}
+.doufang.two{font-size:calc(var(--s)*.27);letter-spacing:-0.04em}
 .day-tab .sub{font-weight:500;color:var(--muted);font-size:.8rem}
 .day-tab[aria-selected="true"]{border-color:var(--c);box-shadow:inset 0 0 0 1.5px var(--c)}
 .day-tab.add{padding:6px 14px;color:var(--muted);border-style:dashed}
@@ -83,7 +81,7 @@ main{max-width:640px;margin:0 auto;padding:20px 16px 120px}
 .lanterns-art{display:block;width:100%;max-width:320px;height:auto;margin:0 auto -6px}
 .day-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:22px}
 .kicker{margin:0 0 2px;color:var(--muted);font-size:.85rem;font-weight:700;letter-spacing:.02em}
-.day-sign{flex:none;width:64px;height:64px;border-radius:18px;transform:rotate(-3deg);background:var(--line);color:var(--on-line);display:grid;place-items:center;font-weight:800;font-size:1.5rem;letter-spacing:-0.02em}
+.day-sign{--s:68px;--c:var(--line);margin:-2px -2px 0}
 .day-meta{flex:1;min-width:0}
 .day-title{margin:0;font-size:1.6rem;line-height:1.15;font-weight:800;letter-spacing:-0.02em}
 .day-sub{margin:4px 0 0;color:var(--muted);font-size:.92rem}
@@ -101,12 +99,19 @@ main.slide-from-left{animation:slide-l .22s ease-out}
 .stop.flash .card{animation:flash 1.4s ease-out}
 @keyframes flash{from{box-shadow:0 0 0 4px var(--line)}}
 
+/* Family view: share dialog and lock screen */
+.link-row{display:flex;gap:8px;margin:0 0 14px}
+.link-row input{flex:1;min-width:0;border:1.5px solid var(--rule);background:var(--bg);border-radius:10px;padding:10px 12px;font-size:.85rem}
+.lock{max-width:420px;margin:12px auto 0;text-align:center}
+.lock h2{margin:0 0 8px;font-size:1.3rem;font-weight:800}
+.lock .field{text-align:left}
+.lock .btns{justify-content:center}
+
 /* Stamp book (集章冊) */
 #bookDialog{overflow:auto}
 .book-total{margin:0 0 18px;font-weight:700}
 .book-day{margin:0 0 20px}
 .book-day-title{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 12px;font-size:1rem;font-weight:800}
-.book-day-title .code{display:grid;place-items:center;min-width:30px;height:24px;padding:0 6px;border-radius:6px;background:var(--c);color:var(--on);font-size:.75rem}
 .book-day-title .sub{color:var(--muted);font-weight:600;font-size:.85rem;white-space:nowrap}
 .book-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:14px 10px}
 .book-grid li{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
@@ -136,6 +141,7 @@ main.slide-from-left{animation:slide-l .22s ease-out}
 .name{margin:2px 0 0;font-size:1.12rem;font-weight:700;line-height:1.25}
 .stop.done .name{text-decoration:line-through;text-decoration-thickness:1.5px}
 .zh{margin:2px 0 0;font-size:1rem;color:var(--muted)}
+.en{margin:2px 0 0;font-size:.88rem;color:var(--muted)}
 .notes{margin:8px 0 0;font-size:.92rem;color:var(--muted);white-space:pre-wrap}
 .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .chip{border:1px solid var(--rule);background:var(--soft);border-radius:999px;padding:6px 12px;font-size:.85rem;font-weight:600;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:6px}
@@ -312,6 +318,7 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
     <h2 id="stopDialogTitle">Add stop</h2>
     <label class="field"><span>Place</span><input id="fName" required placeholder="Longshan Temple"></label>
     <label class="field"><span>Chinese name</span><input id="fZh" lang="zh-Hant" placeholder="艋舺龍山寺"></label>
+    <label class="field"><span>English name (shown small, under the place)</span><input id="fEn" lang="en" placeholder="Longshan Temple"></label>
     <label class="field"><span>Address or Google Maps link (adds a Navigate button)</span><input id="fAddr" placeholder="Paste a Google Maps share link or an address" aria-describedby="addrHint">
       <span class="hint field-hint" id="addrHint" hidden></span></label>
     <div class="row">
@@ -363,6 +370,7 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
       <p class="hint" id="iosHint" hidden>To install: tap the Share button in Safari, then “Add to Home Screen”.</p>
       <button class="btn" type="button" id="addDay">Add a day</button>
       <button class="btn" type="button" id="openBackup">Back up or restore</button>
+      <button class="btn" type="button" id="openShare">Share with family (view-only)</button>
       <button class="btn danger" type="button" id="loadSample">Replace with sample trip</button>
       <button class="btn danger" type="button" id="startBlank">Start a blank trip</button>
     </div>
@@ -395,6 +403,48 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
   </div>
 </dialog>
 
+<!-- Share with family: encrypt the trip into trip.enc.json for the view-only link -->
+<dialog id="shareDialog" aria-labelledby="shareTitle">
+  <div class="sheet">
+    <h2 id="shareTitle">Share with family (view-only)</h2>
+    <p class="hint">Family open this link and type the passphrase. They can look at the trip but can’t change anything.</p>
+    <div class="link-row">
+      <input id="familyLink" readonly aria-label="Family link">
+      <button class="btn" type="button" id="copyLink">Copy</button>
+    </div>
+    <label class="field"><span>Passphrase (12+ characters; four random words is best)</span><input id="sharePass" type="password" autocomplete="new-password"></label>
+    <label class="field"><span>Type it again</span><input id="sharePass2" type="password" autocomplete="new-password"></label>
+    <p class="error" id="shareError" hidden></p>
+    <div class="btns">
+      <button class="btn primary" type="button" id="makeShare">Create encrypted file</button>
+      <button class="btn primary" type="button" id="saveShare" hidden>Save trip.enc.json</button>
+    </div>
+    <p class="hint" id="shareDone" hidden>Next: upload trip.enc.json to the GitHub repo, replacing the old one. Family see the new version a few minutes later, the next time they open the app online.</p>
+    <p class="hint">The file is encrypted on this phone; the passphrase never leaves it. Send the passphrase separately from the link: anyone with both can read the trip.</p>
+    <div class="btns">
+      <span class="spacer"></span>
+      <button class="btn" type="button" data-close>Close</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Family view menu -->
+<dialog id="viewDialog" aria-labelledby="viewTitle">
+  <div class="sheet">
+    <h2 id="viewTitle"><span lang="zh-Hant">家人專用</span> · Family view</h2>
+    <p class="hint">You’re looking at a shared copy of the trip. It updates by itself when you open the app online.</p>
+    <p class="hint" id="viewNote" role="status" hidden></p>
+    <div class="menu-list">
+      <button class="btn" type="button" id="checkUpdate">Check for updates</button>
+      <button class="btn danger" type="button" id="leaveView">Leave view-only mode</button>
+    </div>
+    <div class="btns" style="margin-top:16px">
+      <span class="spacer"></span>
+      <button class="btn primary" type="button" data-close>Done</button>
+    </div>
+  </div>
+</dialog>
+
 <!-- Stamp book -->
 <dialog id="bookDialog" aria-labelledby="bookTitle">
   <div class="sheet">
@@ -415,18 +465,20 @@ dialog::backdrop{background:rgba(8,12,16,.55)}
 /* ---------- Constants ---------- */
 const LS_KEY = "taipei-trip:v1";
 const UI_KEY = "taipei-trip:ui";
-// Day colours borrow Taipei Metro line colours; codes mimic MRT station numbering.
+// Each day gets a warm colour (all keep white text readable). Day codes are formal (banking-style) Chinese
+// numerals (壹, 貳...); stops are numbered 01, 02... within the day.
 const LINES = [
-  {code:"R",  c:"#E3002C", on:"#FFFFFF"},
-  {code:"BL", c:"#0070BD", on:"#FFFFFF"},
-  {code:"G",  c:"#008659", on:"#FFFFFF"},
-  {code:"O",  c:"#F5A818", on:"#1B1B1B"},
-  {code:"BR", c:"#9C6A1F", on:"#FFFFFF"},
-  {code:"Y",  c:"#F2CC00", on:"#1B1B1B"}
+  {c:"#D3301E", on:"#FFFFFF"}, // vermilion 朱紅
+  {c:"#9E6208", on:"#FFFFFF"}, // amber 琥珀
+  {c:"#B64587", on:"#FFFFFF"}, // plum blossom 梅
+  {c:"#BB4E0F", on:"#FFFFFF"}, // persimmon 柿
+  {c:"#966539", on:"#FFFFFF"}, // oolong tea 烏龍
+  {c:"#CC3553", on:"#FFFFFF"}  // rose 玫瑰
 ];
 const CATS = ["Sight","Food","Shopping","Transit","Stay","Other"];
 const CAT_ICON = {Sight:"🏮", Food:"🥟", Shopping:"🛍️", Transit:"🚇", Stay:"🏨", Other:"✨"};
 const ZH_DIGITS = "一二三四五六七八九";
+const ZH_FORMAL = "壹貳參肆伍陸柒捌玖";
 
 /* ---------- Helpers ---------- */
 const $ = (id) => document.getElementById(id);
@@ -457,13 +509,17 @@ function fmtDate(s, long){
   const dt = new Date(y, m-1, d);
   return dt.toLocaleDateString("en-GB", long ? {weekday:"long", day:"numeric", month:"long"} : {weekday:"short", day:"numeric", month:"short"});
 }
-function lineFor(i){ return LINES[i % LINES.length]; }
+function lineFor(i){ return Object.assign({code:zhNum(i+1, ZH_FORMAL, "拾")}, LINES[i % LINES.length]); }
+function doufang(code, extra){
+  return h("span",{class:"doufang" + (code.length > 1 ? " two" : "") + (extra ? " "+extra : ""), "aria-hidden":"true", lang:"zh-Hant", text:code});
+}
+function stopCode(j){ return String(j+1).padStart(2,"0"); }
 function catLabel(c){ return CAT_ICON[c] ? CAT_ICON[c]+" "+c : c; }
 // 1-99 as Chinese numerals, for 第一天 style day labels.
-function zhNum(n){
-  if (n < 10) return ZH_DIGITS[n-1];
+function zhNum(n, digits = ZH_DIGITS, ten = "十"){
+  if (n < 10) return digits[n-1];
   const tens = Math.floor(n/10), ones = n % 10;
-  return (tens > 1 ? ZH_DIGITS[tens-1] : "") + "十" + (ones ? ZH_DIGITS[ones-1] : "");
+  return (tens > 1 ? digits[tens-1] : "") + ten + (ones ? digits[ones-1] : "");
 }
 function daysUntil(s){
   const [y,m,d] = s.split("-").map(Number), n = new Date();
@@ -471,7 +527,7 @@ function daysUntil(s){
 }
 function greeting(){
   const dates = trip.days.map(d => d.date).filter(Boolean).sort();
-  if (!dates.length) return "你好! Add dates to your days to start the countdown ✈️";
+  if (!dates.length) return VIEW ? "你好! Here’s the trip plan ✈️" : "你好! Set day dates for a countdown ✈️";
   const toGo = daysUntil(dates[0]);
   if (toGo > 1) return "還有 "+toGo+" 天 · "+toGo+" days to Taipei ✈️";
   if (toGo === 1) return "明天出發! Taipei tomorrow ✈️";
@@ -562,7 +618,7 @@ function checkTrip(t){
       if (!name) return {error: at+" has no place name."};
       const time = str(s.time);
       if (time && !TIME_RE.test(time)) return {error: at+" ("+name+") has a time that isn’t HH:MM: “"+time+"”."};
-      stops.push(Object.assign({}, s, {id:freshId(s.id), time, name, zh:str(s.zh), address:str(s.address), category:str(s.category), notes:str(s.notes), done:s.done===true}));
+      stops.push(Object.assign({}, s, {id:freshId(s.id), time, name, zh:str(s.zh), en:str(s.en), address:str(s.address), category:str(s.category), notes:str(s.notes), done:s.done===true}));
     }
     days.push(Object.assign({}, d, {id:freshId(d.id), title:str(d.title), date, stops}));
   }
@@ -570,10 +626,25 @@ function checkTrip(t){
 }
 
 /* ---------- State ---------- */
-let trip = loadLocal() || sampleTrip();
+// View-only (family) mode: entered via ?view and remembered on that device until "Leave view-only mode".
+// It keeps the decrypted shared trip under VIEW_KEY and never reads or writes the owner's trip (LS_KEY).
+const VIEW_KEY = "taipei-trip:view";
+let view = loadView();
+const VIEW = !!view;
+let trip = VIEW ? view.trip : (loadLocal() || sampleTrip()); // null in view mode until unlocked
 let ui = loadUi();
-let currentDayId = pickInitialDay();
+let currentDayId = trip ? pickInitialDay() : null;
 let justStamped = null; // stop id whose stamp should animate on the next render
+
+function loadView(){
+  let v = null;
+  try { v = JSON.parse(localStorage.getItem(VIEW_KEY)); } catch(e){}
+  if (!v && new URLSearchParams(location.search).has("view")) v = {};
+  if (!v || typeof v !== "object") return null;
+  const r = v.trip && v.pass ? checkTrip(v.trip) : null;
+  return {pass: r && r.trip ? v.pass : null, ct: v.ct || null, trip: r && r.trip ? r.trip : null};
+}
+function saveView(){ try { localStorage.setItem(VIEW_KEY, JSON.stringify(view)); } catch(e){} }
 
 function loadLocal(){
   let raw = null;
@@ -583,7 +654,7 @@ function loadLocal(){
   if (raw){ try { localStorage.setItem(LS_KEY+":unreadable", raw); } catch(e){} }
   return null;
 }
-function saveLocal(){ try { localStorage.setItem(LS_KEY, JSON.stringify(trip)); } catch(e){} }
+function saveLocal(){ if (VIEW) return; try { localStorage.setItem(LS_KEY, JSON.stringify(trip)); } catch(e){} }
 function loadUi(){ try { return JSON.parse(localStorage.getItem(UI_KEY)) || {}; } catch(e){ return {}; } }
 function saveUi(){ try { localStorage.setItem(UI_KEY, JSON.stringify(ui)); } catch(e){} }
 function pickInitialDay(){
@@ -604,6 +675,7 @@ function commit(){
 
 /* ---------- Render ---------- */
 function render(){
+  if (!trip){ renderLocked(); return; }
   $("tripName").textContent = trip.name || "Taipei trip";
   document.title = trip.name || "Taipei trip";
   if (!trip.days.length){ trip.days.push({id:uid(), title:"Day 1", date:"", stops:[]}); }
@@ -625,12 +697,12 @@ function render(){
       const L = lineFor(i);
       return h("button", {class:"day-tab", role:"tab", "aria-selected": String(d.id===day.id), style:"--c:"+L.c+";--on:"+L.on,
         onclick:() => showDay(d.id, i > idx ? "right" : i < idx ? "left" : null)},
-        h("span",{class:"code", text:L.code}),
+        doufang(L.code),
         h("span",{}, "Day "+(i+1)),
         d.date ? h("span",{class:"sub", text: d.date===t ? "Today" : fmtDate(d.date)}) : null
       );
     }),
-    h("button",{class:"day-tab add", onclick:addDay, "aria-label":"Add a day"}, "+ Day")
+    VIEW ? null : h("button",{class:"day-tab add", onclick:addDay, "aria-label":"Add a day"}, "+ Day")
   );
   const sel = nav.querySelector('[aria-selected="true"]');
   if (sel && sel.scrollIntoView) sel.scrollIntoView({block:"nearest", inline:"nearest"});
@@ -641,13 +713,13 @@ function render(){
   if (day.date) subParts.push(fmtDate(day.date, true));
   if (day.stops.length) subParts.push(doneCount + " of " + day.stops.length + " stamps collected");
   const head = h("section",{class:"day-head"},
-    h("div",{class:"day-sign", "aria-hidden":"true", text: line.code + (idx+1)}),
+    doufang(line.code, "day-sign"),
     h("div",{class:"day-meta"},
       h("p",{class:"kicker"}, h("span",{lang:"zh-Hant", text:"第"+zhNum(idx+1)+"天"}), " · Day "+(idx+1)),
       h("h2",{class:"day-title"}, day.title || ("Day "+(idx+1)), day.date===t ? h("span",{class:"today-flag", text:"Today"}) : null),
       h("p",{class:"day-sub", text: subParts.join(", ") || "No date set"}),
       h("div",{class:"head-links"},
-        h("button",{class:"text-btn", onclick:openDayDialog}, "Edit day"),
+        VIEW ? null : h("button",{class:"text-btn", onclick:openDayDialog}, "Edit day"),
         h("button",{class:"text-btn", onclick:openBook}, "📖 Stamp book"))
     )
   );
@@ -659,7 +731,7 @@ function render(){
       art("bear"),
       h("p",{class:"big-zh", lang:"zh-Hant", text:"慢慢來"}),
       h("p",{text:"Take it easy: nothing planned for this day yet."}),
-      h("button",{class:"btn primary", onclick:() => openStopDialog(null)}, "Add the first stop")
+      VIEW ? null : h("button",{class:"btn primary", onclick:() => openStopDialog(null)}, "Add the first stop")
     );
   } else {
     const nextId = (day.date===t || !day.date) ? (day.stops.find(s => !s.done)||{}).id : null;
@@ -680,11 +752,16 @@ function render(){
 }
 
 function stopItem(s, i, line, isNext){
-  const code = line.code + String(i+1).padStart(2,"0");
+  const code = stopCode(i);
+  const mark = s.done ? h("span",{class:"stamp" + (s.id===justStamped ? " fresh" : ""), lang:"zh-Hant", text:"已到"}) : code;
+  const actions = [
+    s.address ? h("a",{class:"chip primary", href:navUrl(s.address), target:"_blank", rel:"noopener"}, "Navigate") : null,
+    VIEW ? null : h("button",{class:"chip", onclick:() => openStopDialog(s.id)}, "Edit")
+  ].filter(Boolean);
   return h("li",{class:"stop" + (s.done?" done":"") + (isNext?" next":""), "data-stop":s.id},
-    h("button",{class:"badge", "aria-pressed":String(!!s.done), "aria-label":(s.done?"Mark not done: ":"Mark done: ")+s.name,
-      onclick:() => { s.done = !s.done; justStamped = s.done ? s.id : null; commit(); }},
-      s.done ? h("span",{class:"stamp" + (s.id===justStamped ? " fresh" : ""), lang:"zh-Hant", text:"已到"}) : code),
+    VIEW ? h("span",{class:"badge", role:"img", "aria-label":(s.done ? "Done: " : "Not done yet: ") + s.name}, mark)
+         : h("button",{class:"badge", "aria-pressed":String(!!s.done), "aria-label":(s.done?"Mark not done: ":"Mark done: ")+s.name,
+             onclick:() => { s.done = !s.done; justStamped = s.done ? s.id : null; commit(); }}, mark),
     h("div",{class:"card"},
       h("div",{class:"card-top"},
         s.time ? h("span",{class:"time", text:s.time}) : null,
@@ -693,11 +770,9 @@ function stopItem(s, i, line, isNext){
       ),
       h("h3",{class:"name", text:s.name}),
       s.zh ? h("p",{class:"zh", lang:"zh-Hant", text:s.zh}) : null,
+      s.en ? h("p",{class:"en", lang:"en", text:s.en}) : null,
       s.notes ? h("p",{class:"notes", text:s.notes}) : null,
-      h("div",{class:"actions"},
-        s.address ? h("a",{class:"chip primary", href:navUrl(s.address), target:"_blank", rel:"noopener"}, "Navigate") : null,
-        h("button",{class:"chip", onclick:() => openStopDialog(s.id)}, "Edit")
-      )
+      actions.length ? h("div",{class:"actions"}, actions) : null
     )
   );
 }
@@ -719,6 +794,7 @@ function openStopDialog(stopId){
   $("stopDialogTitle").textContent = s ? "Edit stop" : "Add stop";
   $("fName").value = s ? s.name : "";
   $("fZh").value = s ? (s.zh||"") : "";
+  $("fEn").value = s ? (s.en||"") : "";
   $("fAddr").value = s ? (s.address||"") : "";
   $("fTime").value = s ? (s.time||"") : "";
   $("fCat").value = s ? (s.category||"Sight") : "Sight";
@@ -747,7 +823,7 @@ $("saveStop").addEventListener("click", () => {
   const addrText = $("fAddr").value.trim(), link = mapsLink(addrText);
   if (!link && /https?:\/\//i.test(addrText)){ $("stopError").textContent = "The address has a link that isn’t from Google Maps. Paste a Google Maps link or type the address."; $("stopError").hidden = false; $("fAddr").focus(); return; }
   const day = currentDay();
-  const fields = {name, zh:$("fZh").value.trim(), address:link || addrText, time:$("fTime").value, category:$("fCat").value, notes:$("fNotes").value.trim()};
+  const fields = {name, zh:$("fZh").value.trim(), en:$("fEn").value.trim(), address:link || addrText, time:$("fTime").value, category:$("fCat").value, notes:$("fNotes").value.trim()};
   if (editingStopId){
     Object.assign(day.stops.find(x => x.id===editingStopId), fields);
   } else {
@@ -831,6 +907,7 @@ function showDay(id, from){
 }
 $("main").addEventListener("animationend", (e) => { if (e.target === $("main")) e.target.classList.remove("slide-from-left", "slide-from-right"); });
 function stepDay(dir){
+  if (!trip) return; // view mode, still locked
   const j = trip.days.findIndex(d => d.id === currentDayId) + dir;
   if (j >= 0 && j < trip.days.length) showDay(trip.days[j].id, dir > 0 ? "right" : "left");
 }
@@ -864,11 +941,11 @@ function openBook(){
     const L = lineFor(i);
     return h("section",{class:"book-day", style:"--c:"+L.c+";--on:"+L.on},
       h("h3",{class:"book-day-title"},
-        h("span",{class:"code", text:L.code}),
+        doufang(L.code),
         h("span",{text: d.title || "Day "+(i+1)}),
         d.date ? h("span",{class:"sub", text:fmtDate(d.date)}) : null),
       d.stops.length ? h("ol",{class:"book-grid"}, d.stops.map((s,j) => {
-        const code = L.code + String(j+1).padStart(2,"0");
+        const code = stopCode(j);
         return h("li",{},
           // Tilt varies per stamp so the page looks hand-stamped.
           h("button",{class:"book-stamp" + (s.done ? " got" : ""), type:"button", style:"--tilt:" + ((i*7 + j*13) % 21 - 10) + "deg",
@@ -890,7 +967,10 @@ function jumpToStop(dayId, stopId){
 }
 
 /* ---------- Trip menu ---------- */
-$("menuBtn").addEventListener("click", () => { $("tName").value = trip.name || ""; openDlg("menuDialog"); });
+$("menuBtn").addEventListener("click", () => {
+  if (VIEW){ $("viewNote").hidden = true; openDlg("viewDialog"); return; }
+  $("tName").value = trip.name || ""; openDlg("menuDialog");
+});
 $("saveMenu").addEventListener("click", () => {
   const n = $("tName").value.trim() || "Taipei trip";
   $("menuDialog").close();
@@ -924,25 +1004,175 @@ armConfirm($("restoreBackup"), "Replace trip with this text", () => {
   commit();
 });
 
+/* ---------- Shared trip (encrypted trip.enc.json for family view) ---------- */
+// The owner encrypts the trip on their phone; only the encrypted file is ever committed (public repo).
+// PBKDF2-SHA256 turns the passphrase into an AES-256-GCM key. A wrong passphrase fails GCM's integrity check.
+const ENC_FORMAT = "taipei-trip-enc", ENC_ITER = 600000;
+function toB64(bytes){
+  bytes = new Uint8Array(bytes);
+  let s = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+function fromB64(s){ return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+async function deriveKey(pass, salt, iter){
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass.normalize("NFC")), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2", hash:"SHA-256", salt, iterations:iter}, base, {name:"AES-GCM", length:256}, false, ["encrypt", "decrypt"]);
+}
+async function encryptTrip(t, pass){
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(pass, salt, ENC_ITER);
+  const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, new TextEncoder().encode(JSON.stringify(t)));
+  return {format:ENC_FORMAT, v:1, kdf:"PBKDF2-SHA256", iter:ENC_ITER, salt:toB64(salt), iv:toB64(iv), ct:toB64(ct)};
+}
+// Throws Error("pass") for a wrong passphrase (or a tampered file: GCM can't tell them apart), Error("file") otherwise.
+async function decryptTrip(f, pass){
+  let salt, iv, ct;
+  try {
+    if (!f || f.format !== ENC_FORMAT || f.v !== 1) throw 0;
+    // Bound the iteration count so a doctored file can't freeze the phone.
+    if (!Number.isInteger(f.iter) || f.iter < 100000 || f.iter > 5000000) throw 0;
+    salt = fromB64(f.salt); iv = fromB64(f.iv); ct = fromB64(f.ct);
+  } catch(e){ throw new Error("file"); }
+  let plain;
+  try { plain = await crypto.subtle.decrypt({name:"AES-GCM", iv}, await deriveKey(pass, salt, f.iter), ct); }
+  catch(e){ throw new Error("pass"); }
+  let r;
+  try { r = checkTrip(JSON.parse(new TextDecoder().decode(plain))); } catch(e){ r = {}; }
+  if (!r.trip) throw new Error("file");
+  return r.trip;
+}
+async function fetchShared(){
+  let res;
+  try { res = await fetch("./trip.enc.json", {cache:"no-cache"}); }
+  catch(e){ return {error:"You’re offline. Connect to the internet to get the shared trip."}; }
+  if (res.status === 404) return {error:"No trip has been shared yet. Check back later."};
+  if (!res.ok) return {error:"Couldn’t load the shared trip. Try again in a moment."};
+  try { return {file: await res.json()}; } catch(e){ return {error:"The shared trip file is damaged. Ask for it to be shared again."}; }
+}
+
+// Owner side: create trip.enc.json.
+let shareText = null;
+$("openShare").addEventListener("click", () => {
+  $("menuDialog").close();
+  $("familyLink").value = new URL("./?view", location.href).href;
+  $("sharePass").value = $("sharePass2").value = "";
+  $("shareError").hidden = $("shareDone").hidden = $("saveShare").hidden = true;
+  $("makeShare").hidden = false;
+  shareText = null;
+  openDlg("shareDialog");
+});
+$("copyLink").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("familyLink").value); $("copyLink").textContent = "Copied"; }
+  catch(e){ $("familyLink").select(); $("copyLink").textContent = "Selected: copy it"; }
+  setTimeout(() => $("copyLink").textContent = "Copy", 2500);
+});
+$("makeShare").addEventListener("click", async () => {
+  const p1 = $("sharePass").value, p2 = $("sharePass2").value, btn = $("makeShare");
+  const fail = (m) => { $("shareError").textContent = m; $("shareError").hidden = false; };
+  $("shareError").hidden = true;
+  if (p1.length < 12) return fail("Use at least 12 characters. Four random words, like lantern-oyster-maple-bus, are easy to type and hard to guess.");
+  if (p1 !== p2) return fail("The two passphrases don’t match.");
+  if (!window.crypto || !crypto.subtle) return fail("This browser can’t encrypt here. Open the app from its https:// address.");
+  btn.disabled = true; btn.textContent = "Encrypting…";
+  try {
+    shareText = JSON.stringify(await encryptTrip(trip, p1));
+    $("sharePass").value = $("sharePass2").value = "";
+    // Saving is a separate tap: the share sheet needs a fresh tap after the slow key derivation.
+    btn.hidden = true; $("saveShare").hidden = false;
+  } catch(e){ fail("Couldn’t create the file. Try again."); }
+  finally { btn.disabled = false; btn.textContent = "Create encrypted file"; }
+});
+$("saveShare").addEventListener("click", async () => {
+  if (!shareText) return;
+  await offerFile("trip.enc.json", shareText);
+  $("shareDone").hidden = false;
+});
+
+// Family side: lock screen, unlock, automatic refresh, leave.
+function renderLocked(msg){
+  $("tripName").textContent = document.title = "Shared Taipei trip";
+  $("days").replaceChildren();
+  const pass = h("input",{type:"password", autocomplete:"current-password"});
+  const err = h("p",{class:"error", role:"alert", text:msg || "", hidden:!msg});
+  const btn = h("button",{class:"btn primary", type:"submit"}, "Unlock");
+  $("main").replaceChildren(h("form",{class:"lock", onsubmit:(e) => { e.preventDefault(); unlockShared(pass.value, btn, err); }},
+    art("bear"),
+    h("h2",{}, h("span",{lang:"zh-Hant", text:"家人專用"}), " · Family view"),
+    h("p",{class:"hint", text:"This trip is locked. Type the passphrase you were sent. You can look around but not change anything."}),
+    h("label",{class:"field"}, h("span",{text:"Passphrase"}), pass),
+    err,
+    h("div",{class:"btns"}, btn)));
+}
+async function unlockShared(pass, btn, err){
+  const show = (m) => { err.textContent = m; err.hidden = false; btn.disabled = false; btn.textContent = "Unlock"; };
+  if (!pass) return show("Type the passphrase first.");
+  if (!window.crypto || !crypto.subtle) return show("This browser can’t unlock the trip here. Open the https:// link you were sent.");
+  btn.disabled = true; btn.textContent = "Unlocking…"; err.hidden = true;
+  const r = await fetchShared();
+  if (r.error) return show(r.error);
+  try { trip = await decryptTrip(r.file, pass); }
+  catch(e){ return show(e.message === "pass" ? "That passphrase didn’t work. Check it and try again." : "The shared trip file is damaged. Ask for it to be shared again."); }
+  view = {pass, ct:r.file.ct, trip};
+  saveView();
+  currentDayId = pickInitialDay();
+  updateStatus();
+  render();
+}
+// Fetch the latest shared file and decrypt it with the saved passphrase. Returns a note for the view menu.
+async function refreshShared(){
+  if (!view.pass) return "Unlock the trip first.";
+  const r = await fetchShared();
+  if (r.error) return r.error;
+  if (r.file.ct === view.ct) return "You have the latest version.";
+  let t;
+  try { t = await decryptTrip(r.file, view.pass); }
+  catch(e){
+    if (e.message !== "pass") return "The new version couldn’t be read. You’re still seeing the previous one.";
+    // The owner re-locked the trip with a new passphrase: drop the old copy and ask for the new one.
+    view = {pass:null, ct:null, trip:null}; trip = null; saveView(); updateStatus();
+    renderLocked("The trip was locked with a new passphrase. Ask for the new one.");
+    return "The trip was locked with a new passphrase.";
+  }
+  trip = view.trip = t; view.ct = r.file.ct; saveView();
+  updateStatus(); render();
+  return "Updated to the latest version.";
+}
+$("checkUpdate").addEventListener("click", async () => {
+  const note = $("viewNote"), btn = $("checkUpdate");
+  btn.disabled = true; note.hidden = false; note.textContent = "Checking…";
+  note.textContent = await refreshShared();
+  btn.disabled = false;
+});
+armConfirm($("leaveView"), "Leave view-only mode", () => {
+  try { localStorage.removeItem(VIEW_KEY); } catch(e){}
+  location.replace("./");
+});
+
 /* ---------- Theme ---------- */
-// Follows the phone's setting until the toggle is used; then ui.theme ("light"/"dark") wins.
-const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
-function isDark(){ const t = document.documentElement.dataset.theme; return t ? t === "dark" : darkQuery.matches; }
+// Light by default, whatever the phone's setting; dark only after the toggle sets ui.theme to "dark".
+function isDark(){ return document.documentElement.dataset.theme === "dark"; }
 function applyTheme(){
   const root = document.documentElement;
-  if (ui.theme === "light" || ui.theme === "dark") root.dataset.theme = ui.theme; else delete root.dataset.theme;
+  if (ui.theme === "dark") root.dataset.theme = "dark"; else delete root.dataset.theme;
   const dark = isDark();
   $("themeBtn").replaceChildren(art(dark ? "sun" : "moon"));
   $("themeBtn").setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
 }
 $("themeBtn").addEventListener("click", () => { ui.theme = isDark() ? "light" : "dark"; saveUi(); applyTheme(); });
-darkQuery.addEventListener("change", applyTheme);
 applyTheme();
 
 /* ---------- Status, offline support, install ---------- */
 const syncEl = $("sync");
 function scheduleRemote(){ updateStatus(); }
-function updateStatus(){ syncEl.textContent = navigator.onLine ? "Saved on this phone" : "Offline, saved on this phone"; }
+function updateStatus(){
+  if (VIEW){
+    const at = trip && trip.updatedAt ? new Date(trip.updatedAt).toLocaleString("en-GB", {day:"numeric", month:"short", hour:"2-digit", minute:"2-digit"}) : "";
+    syncEl.textContent = "View only" + (at ? " · updated " + at : "");
+    return;
+  }
+  syncEl.textContent = navigator.onLine ? "Saved on this phone" : "Offline, saved on this phone";
+}
 window.addEventListener("online", updateStatus);
 window.addEventListener("offline", updateStatus);
 
@@ -974,10 +1204,8 @@ const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platfo
 if (isIOS && !standalone) $("iosHint").hidden = false;
 
 /* ---------- Backup files ---------- */
-$("saveFile").addEventListener("click", async () => {
-  const name = "taipei-trip-backup-" + todayStr() + ".json";
-  const data = JSON.stringify(trip, null, 1);
-  const file = new File([data], name, {type:"application/json"});
+async function offerFile(name, text){
+  const file = new File([text], name, {type:"application/json"});
   // iOS: the share sheet is the reliable way to save into Files or Notes.
   if (navigator.canShare && navigator.canShare({files:[file]})){
     try { await navigator.share({files:[file], title:name}); return; }
@@ -987,7 +1215,8 @@ $("saveFile").addEventListener("click", async () => {
   const a = h("a",{href:url, download:name});
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
-});
+}
+$("saveFile").addEventListener("click", () => offerFile("taipei-trip-backup-" + todayStr() + ".json", JSON.stringify(trip, null, 1)));
 $("loadFile").addEventListener("click", () => $("fileInput").click());
 $("fileInput").addEventListener("change", async (e) => {
   const f = e.target.files && e.target.files[0];
@@ -1000,8 +1229,10 @@ $("fileInput").addEventListener("change", async (e) => {
   $("backupError").hidden = false;
 });
 
+if (VIEW){ saveView(); $("addStop").hidden = true; }
 updateStatus();
 render();
+if (VIEW && trip) refreshShared(); // show the saved copy now, then pick up a newer version if online
 })();
 </script>
 </body>

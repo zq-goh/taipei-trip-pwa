@@ -6,11 +6,17 @@ Personal itinerary app for a Taipei trip (November 2026). Used on a phone during
 - `index.html`: the whole app (HTML, CSS, JS inline). No build step, no framework, no dependencies.
 - `sw.js`: service worker. Precaches app files (cache-first) so the app opens offline.
 - `manifest.webmanifest`, `icons/`: installability (Add to Home Screen).
-- Data: one JSON object in `localStorage` under key `taipei-trip:v1`; UI state under `taipei-trip:ui`.
-  Shape: `{version, name, updatedAt, days:[{id, title, date:"YYYY-MM-DD", stops:[{id, time:"HH:MM", name, zh, address, category, notes, done}]}]}`
+- `trip.enc.json` (optional, not in `APP_FILES`): the encrypted shared trip for family view. Created by the owner in
+  the app (⋯ > Share with family) and uploaded to the repo. The app fetches it network-first; it is never precached.
+- Data: one JSON object in `localStorage` under key `taipei-trip:v1`; UI state under `taipei-trip:ui`;
+  family view's decrypted copy and passphrase under `taipei-trip:view` (that device only).
+  Shape: `{version, name, updatedAt, days:[{id, title, date:"YYYY-MM-DD", stops:[{id, time:"HH:MM", name, zh, en, address, category, notes, done}]}]}`
 
 ## Design decisions (keep unless asked)
-- Days take Taipei Metro line colours/letters (R, BL, G, O, BR, Y); stops show station-style codes (R01, R02...).
+- Each day takes a warm colour (vermilion, amber, plum, persimmon, oolong tea, rose; all white-text readable, owner's
+  request, Nov 2026). Day codes are formal (banking-style) Chinese numerals (壹, 貳, 參...) shown in a 斗方 (gold-edged
+  diamond of New Year door paper) on the day tabs, day header and stamp book; stops are numbered 01, 02, 03... within
+  the day, with no prefix. The 第一天 kicker keeps everyday numerals.
 - Light-hearted Taiwan theme: warm palette, rounded system font, done stops get a 已到 souvenir stamp (紀念章),
   short Traditional Chinese touches (第一天, 下一站, 終點站, trip countdown) next to English, inline SVG Taipei 101 skyline.
   Chinese is always paired with English so the app stays readable.
@@ -22,6 +28,9 @@ Personal itinerary app for a Taipei trip (November 2026). Used on a phone during
   Google Maps hosts (maps.app.goo.gl, goo.gl/maps, google.<tld>/maps, maps.google.<tld>) and rebuilds the URL as
   https; anything else is treated as search text, so restored data can't produce a non-Google or javascript: href.
   The editor keeps just the link from pasted share text and blocks saving other sites' links.
+- Stops may carry `en`: an optional small English line under the place name, so a trip written in Chinese (the
+  owner's real one is in Simplified Chinese for senior family members, Nov 2026) still has English. Old backups
+  without it restore fine.
 - No "Show driver" screen: removed at the owner's request (Oct 2026). The Chinese name still shows on each card.
 - System fonts only, so nothing loads from the network.
 - Destructive actions use two-tap confirm buttons, not `confirm()`.
@@ -29,16 +38,23 @@ Personal itinerary app for a Taipei trip (November 2026). Used on a phone during
   "📖 Stamp book" by Edit day and from the all-done link. Read-only view of `done`; marking done stays on the badge.
 - Swipe left/right on `main` (or arrow keys) changes day with a short slide. Swipes from within 24px of the screen
   edge are ignored so the browser's back gesture still works.
-- Header sun/moon button toggles light/dark. It follows the phone's setting until first used, then `ui.theme`
-  ("light"/"dark", in `taipei-trip:ui`, not in trip backups) sets `data-theme` on `<html>`. A tiny `<head>` script
-  applies it before first paint.
+- Family view (view-only): `?view` link, remembered per device until "Leave view-only mode". Lock screen asks for the
+  passphrase, then shows the trip with no editing (no add/edit/delete/stamping/settings; stamp book, swipe, Navigate,
+  theme still work). On each online open it re-fetches `trip.enc.json` and updates; a changed passphrase relocks it.
+  Never touches the owner's `taipei-trip:v1`. Encryption: PBKDF2-SHA256 (600k iterations) -> AES-256-GCM, WebCrypto only.
+- Light theme by default, regardless of the phone's setting (owner's request, Nov 2026). The header sun/moon button
+  switches to dark; `ui.theme` ("light"/"dark", in `taipei-trip:ui`, not in trip backups) remembers it, and only
+  "dark" sets `data-theme="dark"` on `<html>`. A tiny `<head>` script applies it before first paint.
 
 ## Rules
 - Every change to any cached file: bump `CACHE_VERSION` in `sw.js` and update `APP_FILES` if files are added or removed.
 - No external scripts, fonts, or CDNs. Everything must work in airplane mode after first load.
 - Use relative paths (`./`) so it works on GitHub Pages project sites.
 - Keep the backup format backward compatible (old backup files must still restore).
-- Never commit the owner's real itinerary, bookings, or personal details to the repo; the trip lives only in localStorage.
+- Never commit the owner's real itinerary, bookings, or personal details in readable form. The only committed copy is
+  `trip.enc.json`, encrypted in the app with the owner's passphrase (owner's decision, Oct 2026). Never ask for,
+  store, log, or commit the passphrase, and never commit plaintext backups (`taipei-trip-backup-*.json` is ignored).
+  Test encrypted files are made from the sample trip in a scratch copy, never in the repo folder.
 - Build user-visible text with `textContent` / the `h()` helper, never `innerHTML` with user data.
 
 ## Testing
